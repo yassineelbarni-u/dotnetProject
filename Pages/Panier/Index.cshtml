@@ -1,0 +1,305 @@
+@page
+@model ProjetTestDotNet.Pages.Panier.IndexModel
+
+<style>
+    body {
+        background-color: #f3f3f3;
+    }
+
+    .cart-header {
+        background: linear-gradient(to bottom, #232f3e, #37475a);
+        color: white;
+        padding: 20px 0;
+        margin-bottom: 30px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .cart-title {
+        color: white;
+        font-size: 32px;
+        font-weight: 700;
+        margin: 0;
+    }
+
+    .cart-container {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 0 20px;
+    }
+
+    .cart-card {
+        background: white;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        padding: 20px;
+        margin-bottom: 20px;
+    }
+
+    .cart-item {
+        display: flex;
+        border-bottom: 1px solid #e7e7e7;
+        padding: 20px 0;
+        align-items: center;
+    }
+
+    .cart-item:last-child {
+        border-bottom: none;
+    }
+
+    .cart-image {
+        width: 120px;
+        height: 120px;
+        object-fit: contain;
+        border: 1px solid #e7e7e7;
+        border-radius: 4px;
+        padding: 10px;
+        background: white;
+    }
+
+    .cart-details {
+        flex: 1;
+        padding: 0 20px;
+    }
+
+    .cart-product-name {
+        color: #007185;
+        font-size: 18px;
+        font-weight: 600;
+        margin-bottom: 8px;
+    }
+
+    .cart-product-name:hover {
+        color: #c7511f;
+        cursor: pointer;
+    }
+
+    .cart-price {
+        color: #B12704;
+        font-size: 24px;
+        font-weight: 700;
+    }
+
+    .cart-quantity {
+        width: 70px;
+        padding: 8px;
+        border: 1px solid #888c8c;
+        border-radius: 8px;
+        text-align: center;
+        font-weight: 600;
+    }
+
+    .btn-update {
+        background-color: #ffd814;
+        border: 1px solid #fcd200;
+        color: #0f1111;
+        font-weight: 600;
+        padding: 8px 16px;
+        border-radius: 8px;
+        margin-left: 10px;
+        transition: all 0.2s;
+    }
+
+    .btn-update:hover {
+        background-color: #f7ca00;
+    }
+
+    .btn-delete {
+        background-color: white;
+        border: 1px solid #d5d9d9;
+        color: #0f1111;
+        padding: 8px 16px;
+        border-radius: 8px;
+        transition: all 0.2s;
+    }
+
+    .btn-delete:hover {
+        background-color: #f7fafa;
+        border-color: #888c8c;
+    }
+
+    .total-box {
+        background: white;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        padding: 30px;
+        position: sticky;
+        top: 20px;
+    }
+
+    .total-amount {
+        font-size: 28px;
+        color: #B12704;
+        font-weight: 700;
+    }
+
+    .btn-checkout {
+        background-color: #ffd814;
+        border: 1px solid #fcd200;
+        color: #0f1111;
+        font-weight: 600;
+        padding: 12px;
+        border-radius: 8px;
+        width: 100%;
+        font-size: 16px;
+        transition: all 0.2s;
+        margin-top: 15px;
+    }
+
+    .btn-checkout:hover {
+        background-color: #f7ca00;
+    }
+
+    .btn-continue {
+        background: white;
+        border: 1px solid #d5d9d9;
+        color: #0f1111;
+        padding: 10px 20px;
+        border-radius: 8px;
+        text-decoration: none;
+        transition: all 0.2s;
+        display: inline-block;
+    }
+
+    .btn-continue:hover {
+        background-color: #f7fafa;
+        border-color: #888c8c;
+        color: #0f1111;
+    }
+
+    .empty-cart {
+        background: white;
+        border-radius: 8px;
+        padding: 60px;
+        text-align: center;
+    }
+
+    .empty-cart-icon {
+        font-size: 80px;
+        color: #888c8c;
+        margin-bottom: 20px;
+    }
+</style>
+
+<!-- Header -->
+<div class="cart-header">
+    <div class="cart-container">
+        <h1 class="cart-title">🛒 Mon Panier</h1>
+    </div>
+</div>
+
+<div class="cart-container">
+
+    @if (TempData["Message"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <strong>✅ @TempData["Message"]</strong>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    @if (!Model.ArticlesPanier.Any())
+    {
+
+        <div class="empty-cart">
+            <div class="empty-cart-icon">🛒</div>
+            <h3 style="color: #565959; margin-bottom: 20px;">Votre panier est vide</h3>
+            <p style="color: #888c8c; margin-bottom: 30px;">Découvrez nos produits et commencez vos achats !</p>
+            <a asp-page="/Produit/Index" class="btn-checkout" style="max-width: 300px; margin: 0 auto; display: block;">
+                Voir les produits
+            </a>
+        </div>
+    }
+    else
+    {
+
+        <div class="row">
+
+            <div class="col-lg-9">
+                <div class="cart-card">
+                    @foreach (var item in Model.ArticlesPanier)
+                    {
+                        <div class="cart-item">
+                            <div>
+                                @if (!string.IsNullOrEmpty(item.Produit?.Image))
+                                {
+                                    <img src="@item.Produit.Image" alt="@item.Produit.Nom" class="cart-image">
+                                }
+                                else
+                                {
+                                    <img src="https://via.placeholder.com/120x120?text=Image" alt="Image" class="cart-image">
+                                }
+                            </div>
+
+                            <div class="cart-details">
+                                <h5 class="cart-product-name">@item.Produit?.Nom</h5>
+                                <p style="color: #007600; font-size: 14px; margin-bottom: 8px;">
+                                    <strong>✓</strong> En stock
+                                </p>
+                                <p style="color: #565959; font-size: 14px; margin-bottom: 10px;">
+                                    @item.Produit?.Description
+                                </p>
+                                <div class="cart-price">€@item.PrixUnitaire.ToString("F2")</div>
+                                <p style="color: #888c8c; font-size: 12px; margin-top: 5px;">
+                                    Prix garanti au moment de l'ajout
+                                </p>
+                            </div>
+
+                            <div style="text-align: center;">
+                                <form method="post" asp-page-handler="ModifierQuantite" asp-route-id="@item.Id" class="mb-3">
+                                    <div class="d-flex align-items-center justify-content-center">
+                                        <select name="quantite" class="cart-quantity">
+                                            @for (int i = 1; i <= 10; i++)
+                                            {
+                                                <option value="@i" selected="@(i == item.Quantite)">Qté: @i</option>
+                                            }
+                                        </select>
+                                        <button type="submit" class="btn-update">Mettre à jour</button>
+                                    </div>
+                                </form>
+                                
+                                <form method="post" asp-page-handler="Supprimer" asp-route-id="@item.Id">
+                                    <button type="submit" class="btn-delete">🗑️ Supprimer</button>
+                                </form>
+                                
+                                <div style="margin-top: 15px; color: #565959; font-weight: 600;">
+                                    Sous-total: <span style="color: #B12704;">€@((item.PrixUnitaire * item.Quantite).ToString("F2"))</span>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+
+                <div style="margin-top: 20px;">
+                    <a asp-page="/Produit/Index" class="btn-continue">
+                        ← Continuer mes achats
+                    </a>
+                </div>
+            </div>
+
+            <div class="col-lg-3">
+                <div class="total-box">
+                    <div style="color: #007600; font-size: 14px; margin-bottom: 15px;">
+                        ✓ Votre commande est éligible à la livraison GRATUITE
+                    </div>
+                    
+                    <div style="border-top: 1px solid #e7e7e7; padding-top: 15px;">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                            <span style="color: #565959;">Sous-total (@Model.ArticlesPanier.Count article(s)):</span>
+                        </div>
+                        <div class="total-amount">
+                            €@Model.Total.ToString("F2")
+                        </div>
+                    </div>
+
+                    <button class="btn-checkout" disabled>
+                        Passer la commande
+                    </button>
+                    
+                    <p style="color: #888c8c; font-size: 12px; margin-top: 15px; text-align: center;">
+                        Le montant total sera confirmé lors du paiement
+                    </p>
+                </div>
+            </div>
+        </div>
+    }
+</div>

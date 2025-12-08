@@ -1,0 +1,69 @@
+@page
+@model ProjetTestDotNet.Pages.Produit.CreateModel
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow">
+                <div class="card-header bg-success text-white">
+                    <h3 class="mb-0">Ajouter un nouveau produit</h3>
+                </div>
+                <div class="card-body">
+                    @if (TempData["Message"] != null)
+                    {
+                        <div class="alert alert-success alert-dismissible fade show">
+                            ✅ @TempData["Message"]
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    }
+
+                    <form method="post" enctype="multipart/form-data">
+                        <div class="mb-3">
+                            <label asp-for="Produit.Nom" class="form-label fw-bold">Nom du produit</label>
+                            <input asp-for="Produit.Nom" class="form-control" placeholder="Ex: iPhone 15, Laptop Dell..." required />
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label asp-for="Produit.Description" class="form-label fw-bold">Description</label>
+                            <textarea asp-for="Produit.Description" class="form-control" rows="4" placeholder="Décrivez le produit..."></textarea>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="Produit.Prix" class="form-label fw-bold">Prix ($)</label>
+                                <input asp-for="Produit.Prix" type="number" step="0.01" class="form-control" placeholder="0.00" required />
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="Produit.Stock" class="form-label fw-bold">Stock disponible</label>
+                                <input asp-for="Produit.Stock" type="number" min="0" class="form-control" placeholder="0" required />
+                                <small class="form-text text-muted">Nombre d'unités en stock</small>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label asp-for="Produit.Categorie" class="form-label fw-bold">Catégorie</label>
+                            <input asp-for="Produit.Categorie" class="form-control" placeholder="Ex: Lighting, Kitchenware, Home Decor, Office, Plants, Furniture" />
+                            <small class="form-text text-muted">Entrez le nom de la catégorie</small>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="ImageFile" class="form-label fw-bold">Image du produit</label>
+                            <input type="file" name="ImageFile" id="ImageFile" class="form-control" accept="image/*" />
+                            <small class="form-text text-muted">Sélectionnez une image (JPG, PNG, etc.)</small>
+                        </div>
+                        
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
+                            <a asp-page="/Admin/Dashboard" class="btn btn-secondary btn-lg">
+                                Annuler
+                            </a>
+                            <button type="submit" class="btn btn-success btn-lg">
+                               Ajouter le produit
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

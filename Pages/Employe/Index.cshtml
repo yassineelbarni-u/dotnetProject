@@ -1,0 +1,24 @@
+@page "/Employe"
+@model ProjetTestDotNet.Pages.Employe.IndexModel
+
+<h2>Liste des employes</h2>
+
+<table class="table">
+    <thead>
+    <tr>
+        <th>Nom</th>
+        <th>Poste</th>
+        <th>Salaire</th>
+    </tr>
+    </thead>
+    <tbody>
+    @foreach (var e in Model.Employes)
+    {
+        <tr>
+            <td>@e.Nom</td>
+            <td>@e.Poste</td>
+            <td>@e.Salaire</td>
+        </tr>
+    }
+    </tbody>
+</table>

@@ -1,0 +1,493 @@
+@page "/Produit"
+@model ProjetTestDotNet.Pages.Produit.IndexModel
+
+@{
+    var adminUsername = HttpContext.Session.GetString("AdminUsername");
+}
+
+<style>
+    body {
+        background-color: #f5f5f5;
+        font-family: Arial, sans-serif;
+        margin: 0;
+    }
+
+
+    .shop-header {
+        background: #ffffff;
+        border-bottom: 1px solid #e0e0e0;
+        padding: 20px 0;
+        margin-bottom: 30px;
+    }
+
+    .shop-title {
+        font-size: 32px;
+        font-weight: 700;
+        color: #333;
+        margin: 0;
+    }
+
+
+    .shop-container {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 0 20px;
+        display: flex;
+        gap: 30px;
+    }
+
+    .sidebar {
+        width: 250px;
+        flex-shrink: 0;
+    }
+
+    .category-section {
+        background: white;
+        border-radius: 8px;
+        padding: 20px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        margin-bottom: 20px;
+    }
+
+    .category-title {
+        font-size: 18px;
+        font-weight: 700;
+        color: #333;
+        margin-bottom: 15px;
+        padding-bottom: 10px;
+        border-bottom: 2px solid #f0f0f0;
+    }
+
+    .category-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    .category-item {
+        padding: 10px 12px;
+        margin-bottom: 5px;
+        border-radius: 6px;
+        cursor: pointer;
+        transition: all 0.2s;
+        color: #555;
+        font-size: 15px;
+        display: block;
+        text-decoration: none;
+    }
+
+    .category-item:hover {
+        background-color: #f7f7f7;
+        color: #333;
+    }
+
+    .category-item.active {
+        background-color: #000;
+        color: #fff;
+        font-weight: 600;
+    }
+
+    .products-section {
+        flex: 1;
+    }
+
+    .products-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+        gap: 20px;
+    }
+
+    .product-card-mini {
+        background: white;
+        border-radius: 12px;
+        overflow: hidden;
+        cursor: pointer;
+        transition: all 0.3s;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+
+    .product-card-mini:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+    }
+
+    .product-image-mini {
+        width: 100%;
+        height: 220px;
+        object-fit: cover;
+        background: #f9f9f9;
+    }
+
+    .product-info-mini {
+        padding: 15px;
+    }
+
+    .product-name-mini {
+        font-size: 15px;
+        font-weight: 600;
+        color: #333;
+        margin-bottom: 8px;
+        line-height: 1.4;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    .product-category-tag {
+        font-size: 12px;
+        color: #888;
+        background: #f5f5f5;
+        padding: 3px 8px;
+        border-radius: 4px;
+        display: inline-block;
+        margin-bottom: 8px;
+    }
+
+    .product-price-mini {
+        font-size: 20px;
+        font-weight: 700;
+        color: #333;
+        margin-bottom: 10px;
+    }
+
+    .product-stock-mini {
+        font-size: 13px;
+        margin-bottom: 10px;
+    }
+
+    .btn-add-mini {
+        background-color: #000;
+        color: #fff;
+        border: none;
+        padding: 10px;
+        border-radius: 8px;
+        width: 100%;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+
+    .btn-add-mini:hover {
+        background-color: #333;
+    }
+
+    .btn-add-mini:disabled {
+        background-color: #ccc;
+        cursor: not-allowed;
+    }
+
+
+    .cart-sidebar {
+        position: fixed;
+        right: 0;
+        top: 0;
+        width: 380px;
+        height: 100vh;
+        background: white;
+        box-shadow: -2px 0 10px rgba(0,0,0,0.1);
+        padding: 30px;
+        overflow-y: auto;
+        z-index: 1000;
+    }
+
+    .cart-close {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        background: none;
+        border: none;
+        font-size: 24px;
+        cursor: pointer;
+        color: #999;
+    }
+
+    .cart-header {
+        font-size: 20px;
+        font-weight: 700;
+        margin-bottom: 20px;
+        padding-bottom: 15px;
+        border-bottom: 1px solid #e0e0e0;
+    }
+
+    .cart-item-preview {
+        display: flex;
+        gap: 15px;
+        margin-bottom: 20px;
+        padding-bottom: 20px;
+        border-bottom: 1px solid #f0f0f0;
+    }
+
+    .cart-item-img {
+        width: 80px;
+        height: 80px;
+        object-fit: cover;
+        border-radius: 8px;
+    }
+
+    .cart-item-details {
+        flex: 1;
+    }
+
+    .cart-item-name {
+        font-size: 14px;
+        font-weight: 600;
+        margin-bottom: 5px;
+    }
+
+    .cart-item-qty {
+        font-size: 13px;
+        color: #666;
+    }
+
+    .cart-item-price {
+        font-size: 15px;
+        font-weight: 700;
+    }
+
+    .cart-total {
+        border-top: 2px solid #e0e0e0;
+        padding-top: 20px;
+        margin-top: 20px;
+    }
+
+    .cart-total-label {
+        font-size: 18px;
+        font-weight: 600;
+    }
+
+    .cart-total-amount {
+        font-size: 28px;
+        font-weight: 700;
+        color: #000;
+    }
+
+    .btn-checkout {
+        background-color: #000;
+        color: #fff;
+        border: none;
+        padding: 15px;
+        border-radius: 8px;
+        width: 100%;
+        font-size: 16px;
+        font-weight: 700;
+        cursor: pointer;
+        margin-top: 20px;
+        transition: all 0.2s;
+    }
+
+    .btn-checkout:hover {
+        background-color: #333;
+    }
+
+    .cart-toggle-btn {
+        position: fixed;
+        right: 30px;
+        top: 100px;
+        background: #000;
+        color: #fff;
+        border: none;
+        padding: 15px 20px;
+        border-radius: 50px;
+        font-weight: 700;
+        cursor: pointer;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        z-index: 999;
+        font-size: 16px;
+    }
+
+    .cart-toggle-btn:hover {
+        background: #333;
+    }
+
+    .badge-count {
+        background: #ff3b30;
+        color: white;
+        border-radius: 50%;
+        padding: 2px 8px;
+        font-size: 12px;
+        margin-left: 8px;
+    }
+</style>
+
+
+<div class="shop-header">
+    <div style="max-width: 1400px; margin: 0 auto; padding: 0 20px; display: flex; justify-content: space-between; align-items: center;">
+        <h1 class="shop-title"> Community Shop</h1>
+        <div>
+            @if (!string.IsNullOrEmpty(adminUsername))
+            {
+                <span style="margin-right: 15px;">👤 @adminUsername</span>
+                <a asp-page="/Admin/Dashboard" class="btn btn-sm btn-warning">Admin</a>
+                <a asp-page="/Admin/Logout" class="btn btn-sm btn-secondary ms-2">Déconnexion</a>
+            }
+            else
+            {
+                <a asp-page="/Admin/Login" class="btn btn-sm btn-dark">Connexion</a>
+            }
+        </div>
+    </div>
+</div>
+
+
+@if (TempData["Message"] != null)
+{
+    <div style="max-width: 1400px; margin: 0 auto 20px; padding: 0 20px;">
+        <div class="alert alert-success alert-dismissible fade show">
+            ✅ @TempData["Message"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    </div>
+}
+
+@if (TempData["Error"] != null)
+{
+    <div style="max-width: 1400px; margin: 0 auto 20px; padding: 0 20px;">
+        <div class="alert alert-danger alert-dismissible fade show">
+            ❌ @TempData["Error"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    </div>
+}
+
+
+<button class="cart-toggle-btn" onclick="toggleCart()">
+    🛒 Panier
+    @if (Model.NombreArticlesPanier > 0)
+    {
+        <span class="badge-count">@Model.NombreArticlesPanier</span>
+    }
+</button>
+
+<div class="shop-container">
+    <aside class="sidebar">
+        <div class="category-section">
+            <h3 class="category-title">Catégories</h3>
+            <nav>
+                <a asp-page="/Produit/Index" class="category-item @(string.IsNullOrEmpty(Model.Categorie) ? "active" : "")">
+                    Tous les produits
+                </a>
+                @foreach (var cat in Model.Categories)
+                {
+                    <a asp-page="/Produit/Index" 
+                       asp-route-categorie="@cat" 
+                       class="category-item @(Model.Categorie == cat ? "active" : "")">
+                        @cat
+                    </a>
+                }
+            </nav>
+        </div>
+    </aside>
+
+
+    <main class="products-section">
+        <div class="products-grid">
+            @foreach (var p in Model.Produits)
+            {
+                <div class="product-card-mini">
+                    @if (!string.IsNullOrEmpty(p.Image))
+                    {
+                        <img src="@p.Image" class="product-image-mini" alt="@p.Nom">
+                    }
+                    else
+                    {
+                        <img src="https://via.placeholder.com/220x220?text=No+Image" class="product-image-mini" alt="Image">
+                    }
+                    <div class="product-info-mini">
+                        @if (!string.IsNullOrEmpty(p.Categorie))
+                        {
+                            <span class="product-category-tag">@p.Categorie</span>
+                        }
+                        <h3 class="product-name-mini">@p.Nom</h3>
+                        
+                        @if (p.Stock > 0)
+                        {
+                            <div class="product-stock-mini" style="color: #00b300;">✓ Qty: @p.Stock</div>
+                        }
+                        else
+                        {
+                            <div class="product-stock-mini" style="color: #ff3b30;">✗ Rupture</div>
+                        }
+                        
+                        <div class="product-price-mini">$@p.Prix.ToString("F0")</div>
+                        
+                        <form method="post" asp-page-handler="AjouterPanier" asp-route-id="@p.Id">
+                            @if (p.Stock > 0)
+                            {
+                                <button type="submit" class="btn-add-mini">Ajouter</button>
+                            }
+                            else
+                            {
+                                <button type="button" class="btn-add-mini" disabled>Rupture</button>
+                            }
+                        </form>
+                    </div>
+                </div>
+            }
+        </div>
+    </main>
+</div>
+
+<div class="cart-sidebar" id="cartSidebar" style="display: none;">
+    <button class="cart-close" onclick="toggleCart()">✕</button>
+    <h2 class="cart-header">Mon Panier</h2>
+    
+    <div id="cart-content">
+        <p style="color: #999; text-align: center; margin-top: 50px;">Chargement...</p>
+    </div>
+    
+    <div class="cart-total">
+        <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+            <span class="cart-total-label">Total</span>
+            <span class="cart-total-amount" id="cart-total-amount">$0</span>
+        </div>
+        <a asp-page="/Panier/Index" class="btn-checkout">Checkout</a>
+    </div>
+</div>
+
+<script>
+    function toggleCart() {
+        const sidebar = document.getElementById('cartSidebar');
+        if (sidebar.style.display === 'none') {
+            sidebar.style.display = 'block';
+            loadCartPreview();
+        } else {
+            sidebar.style.display = 'none';
+        }
+    }
+    
+    function loadCartPreview() {
+        document.getElementById('cart-content').innerHTML = '<p style="color: #999; text-align: center; margin-top: 50px;">Chargement...</p>';
+        
+        fetch('/Produit?handler=CartPreview')
+            .then(response => response.json())
+            .then(data => {
+                let html = '';
+                
+                if (data.items.length === 0) {
+                    html = '<p style="color: #999; text-align: center; margin-top: 50px;">Votre panier est vide</p>';
+                } else {
+                    html = '<div style="padding: 15px;">';
+                    data.items.forEach(item => {
+                        html += `
+                            <div style="border-bottom: 1px solid #eee; padding: 10px 0; margin-bottom: 10px;">
+                                <div style="font-weight: 500; margin-bottom: 5px;">${item.nom}</div>
+                                <div style="display: flex; justify-content: space-between; color: #666; font-size: 14px;">
+                                    <span>Qté: ${item.quantite}</span>
+                                    <span>$${item.sousTotal.toFixed(0)}</span>
+                                </div>
+                            </div>
+                        `;
+                    });
+                    html += '</div>';
+                }
+                
+                document.getElementById('cart-content').innerHTML = html;
+                document.getElementById('cart-total-amount').textContent = '$' + data.total.toFixed(0);
+            })
+            .catch(error => {
+                console.error('Erreur:', error);
+                document.getElementById('cart-content').innerHTML = '<p style="color: red; text-align: center;">Erreur de chargement</p>';
+            });
+    }
+</script>

@@ -1,0 +1,121 @@
+@page
+@model ProjetTestDotNet.Pages.Admin.DashboardModel
+
+@{
+    var adminUsername = HttpContext.Session.GetString("AdminUsername");
+    if (string.IsNullOrEmpty(adminUsername))
+    {
+        Response.Redirect("/Admin/Login");
+        return;
+    }
+}
+
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <h2> Gestion des Produits - Admin Dashboard</h2>
+                <div>
+                    <span class="badge bg-success fs-6 me-3"> @adminUsername</span>
+                    <a asp-page="/Admin/Logout" class="btn btn-danger">Déconnexion</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @if (TempData["Message"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show">
+            @TempData["Message"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <div class="row mb-3">
+        <div class="col-12">
+            <a asp-page="/Produit/Create" class="btn btn-success btn-lg">
+                <i class="bi bi-plus-circle"></i> Ajouter un nouveau produit
+            </a>
+            @* <a asp-page="/Produit/Index" class="btn btn-outline-primary btn-lg ms-2">
+                <i class="bi bi-shop"></i> Voir le site public
+            </a> *@
+        </div>
+    </div>
+
+    <div class="card shadow">
+        <div class="card-header bg-primary text-white">
+            <h4 class="mb-0">Liste des produits (@Model.Produits.Count)</h4>
+        </div>
+        <div class="card-body">
+            @if (!Model.Produits.Any())
+            {
+                <div class="alert alert-info">
+                    Aucun produit pour le moment
+                </div>
+            }
+            else
+            {
+                <div class="table-responsive">
+                    <table class="table table-hover table-bordered">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>ID</th>
+                                <th>Image</th>
+                                <th>Nom</th>
+                                <th>Description</th>
+                                <th>Prix</th>
+                                <th>Stock</th>
+                                <th style="width: 200px;">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var produit in Model.Produits)
+                            {
+                                <tr>
+                                    <td>@produit.Id</td>
+                                    <td>
+                                        @if (!string.IsNullOrEmpty(produit.Image))
+                                        {
+                                            <img src="@produit.Image" alt="@produit.Nom" style="width: 60px; height: 60px; object-fit: cover; border-radius: 5px;">
+                                        }
+                                        else
+                                        {
+                                            <img src="https://via.placeholder.com/60" alt="Pas d'image" style="width: 60px; height: 60px; border-radius: 5px;">
+                                        }
+                                    </td>
+                                    <td><strong>@produit.Nom</strong></td>
+                                    <td>@produit.Description</td>
+                                    <td class="text-primary fw-bold">@produit.Prix €</td>
+                                    <td>
+                                        @if (produit.Stock > 10)
+                                        {
+                                            <span class="badge bg-success">@produit.Stock unités</span>
+                                        }
+                                        else if (produit.Stock > 0)
+                                        {
+                                            <span class="badge bg-warning text-dark">@produit.Stock unités</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-danger">Rupture</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        <a asp-page="/Produit/Edit" asp-route-id="@produit.Id" class="btn btn-sm btn-warning">
+                                            <i class="bi bi-pencil"></i> Modifier
+                                        </a>
+                                        <form method="post" asp-page-handler="Delete" asp-route-id="@produit.Id" class="d-inline" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer ce produit ?');">
+                                            <button type="submit" class="btn btn-sm btn-danger">
+                                                <i class="bi bi-trash"></i> Supprimer
+                                            </button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+        </div>
+    </div>
+</div>
