@@ -83,8 +83,6 @@ C:\Users\USER1\ProjetTestDotNet\obj\Debug\net10.0\compressed\cowpt3i03r-{0}-2z0n
 C:\Users\USER1\ProjetTestDotNet\obj\Debug\net10.0\compressed\igwe3k9yb0-{0}-muycvpuwrr-muycvpuwrr.gz
 C:\Users\USER1\ProjetTestDotNet\obj\Debug\net10.0\compressed\wi32nvr93d-{0}-87fc7y1x7t-87fc7y1x7t.gz
 C:\Users\USER1\ProjetTestDotNet\obj\Debug\net10.0\compressed\aefnwzezvt-{0}-mlv21k5csn-mlv21k5csn.gz
-C:\Users\USER1\ProjetTestDotNet\obj\Debug\net10.0\compressed\juqnbjvg6a-{0}-cz5sy1vnn5-cz5sy1vnn5.gz
-C:\Users\USER1\ProjetTestDotNet\obj\Debug\net10.0\compressed\25ek0devb2-{0}-cz5sy1vnn5-cz5sy1vnn5.gz
 C:\Users\USER1\ProjetTestDotNet\obj\Debug\net10.0\staticwebassets.build.json
 C:\Users\USER1\ProjetTestDotNet\obj\Debug\net10.0\staticwebassets.build.json.cache
 C:\Users\USER1\ProjetTestDotNet\obj\Debug\net10.0\staticwebassets.development.json
@@ -277,3 +275,6 @@ C:\Users\USER1\ProjetTestDotNet\bin\Debug\net10.0\runtimes\win-x64\native\Micros
 C:\Users\USER1\ProjetTestDotNet\bin\Debug\net10.0\runtimes\win-x86\native\Microsoft.Data.SqlClient.SNI.dll
 C:\Users\USER1\ProjetTestDotNet\bin\Debug\net10.0\runtimes\win\lib\net9.0\System.Windows.Extensions.dll
 C:\Users\USER1\ProjetTestDotNet\obj\Debug\net10.0\ProjetTe.6AA29760.Up2Date
+C:\Users\USER1\ProjetTestDotNet\obj\Debug\net10.0\ProjetTestDotNet.sourcelink.json
+C:\Users\USER1\ProjetTestDotNet\obj\Debug\net10.0\compressed\juqnbjvg6a-{0}-qvlpr8gvco-qvlpr8gvco.gz
+C:\Users\USER1\ProjetTestDotNet\obj\Debug\net10.0\compressed\25ek0devb2-{0}-qvlpr8gvco-qvlpr8gvco.gz

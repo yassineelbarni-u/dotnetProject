@@ -116,7 +116,6 @@ namespace ProjetTestDotNet.Pages.Produit
             }
 
             await _context.SaveChangesAsync();
-            TempData["Message"] = "Produit ajoute au panier avec succes !";
             
             return RedirectToPage();
         }
