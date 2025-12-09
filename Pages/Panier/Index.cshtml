@@ -79,24 +79,46 @@
         font-weight: 700;
     }
 
-    .cart-quantity {
-        width: 70px;
-        padding: 8px;
-        border: 1px solid #888c8c;
-        border-radius: 8px;
-        text-align: center;
-        font-weight: 600;
+    .quantity-controls {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        justify-content: center;
+        margin-bottom: 15px;
     }
 
-    .btn-update {
-        background-color: #ffd814;
-        border: 1px solid #fcd200;
+    .btn-quantity {
+        background-color: #f0f0f0;
+        border: 1px solid #d0d0d0;
         color: #0f1111;
-        font-weight: 600;
+        font-weight: 700;
         padding: 8px 16px;
-        border-radius: 8px;
-        margin-left: 10px;
+        border-radius: 6px;
+        cursor: pointer;
         transition: all 0.2s;
+        font-size: 18px;
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .btn-quantity:hover {
+        background-color: #e0e0e0;
+        border-color: #888c8c;
+    }
+
+    .quantity-display {
+        width: 60px;
+        padding: 10px;
+        border: 2px solid #2c3e50;
+        border-radius: 6px;
+        text-align: center;
+        font-weight: 700;
+        font-size: 16px;
+        background: white;
+        color: #2c3e50;
     }
 
     .btn-update:hover {
@@ -245,17 +267,19 @@
                             </div>
 
                             <div style="text-align: center;">
-                                <form method="post" asp-page-handler="ModifierQuantite" asp-route-id="@item.Id" class="mb-3">
-                                    <div class="d-flex align-items-center justify-content-center">
-                                        <select name="quantite" class="cart-quantity">
-                                            @for (int i = 1; i <= 10; i++)
-                                            {
-                                                <option value="@i" selected="@(i == item.Quantite)">Qté: @i</option>
-                                            }
-                                        </select>
-                                        <button type="submit" class="btn-update">Mettre à jour</button>
-                                    </div>
-                                </form>
+                                <div class="quantity-controls">
+                                    <form method="post" asp-page-handler="ModifierQuantite" asp-route-id="@item.Id" style="margin: 0;">
+                                        <input type="hidden" name="quantite" value="@(item.Quantite - 1)" />
+                                        <button type="submit" class="btn-quantity" @(item.Quantite <= 1 ? "disabled" : "")>−</button>
+                                    </form>
+                                    
+                                    <div class="quantity-display">@item.Quantite</div>
+                                    
+                                    <form method="post" asp-page-handler="ModifierQuantite" asp-route-id="@item.Id" style="margin: 0;">
+                                        <input type="hidden" name="quantite" value="@(item.Quantite + 1)" />
+                                        <button type="submit" class="btn-quantity" @(item.Quantite >= item.Produit.Stock ? "disabled" : "")>+</button>
+                                    </form>
+                                </div>
                                 
                                 <form method="post" asp-page-handler="Supprimer" asp-route-id="@item.Id">
                                     <button type="submit" class="btn-delete">🗑️ Supprimer</button>
