@@ -9,6 +9,8 @@ namespace ProjetTestDotNet.Models
         public string? UserId { get; set; }
         
         public int ProduitId { get; set; }
+
+
         public Produit? Produit { get; set; }
         
         public int Quantite { get; set; }

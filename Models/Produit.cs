@@ -9,7 +9,6 @@ namespace ProjetTestDotNet.Models
         public string? Image { get; set; }
         public int Stock { get; set; } = 0;
         
-        // Catégorie simple (texte)
         public string? Categorie { get; set; }
     }
 }

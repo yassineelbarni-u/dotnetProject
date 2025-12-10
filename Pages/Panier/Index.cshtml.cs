@@ -24,6 +24,7 @@ namespace ProjetTestDotNet.Pages.Panier
             
             if (!string.IsNullOrEmpty(sessionId))
             {
+                // Charger les articles du panier pour cette session
                 ArticlesPanier = await _context.Paniers
                     .Include(p => p.Produit)
                     .Where(p => p.SessionId == sessionId)
@@ -47,7 +48,7 @@ namespace ProjetTestDotNet.Pages.Panier
             {
                 _context.Paniers.Remove(panier);
                 await _context.SaveChangesAsync();
-                TempData["Message"] = "Article supprimé du panier.";
+                TempData["Message"] = "Article supprime du panier.";
             }
 
             return RedirectToPage();
@@ -62,7 +63,7 @@ namespace ProjetTestDotNet.Pages.Panier
             {
                 panier.Quantite = quantite;
                 await _context.SaveChangesAsync();
-                TempData["Message"] = "Quantité mise à jour.";
+                // TempData["Message"] = "Quantité mise à jour.";
             }
 
             return RedirectToPage();

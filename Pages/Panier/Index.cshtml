@@ -3,43 +3,47 @@
 
 <style>
     body {
-        background-color: #f3f3f3;
+        background-color: #eaeded;
+        font-family: 'Amazon Ember', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     }
 
     .cart-header {
-        background: linear-gradient(to bottom, #232f3e, #37475a);
+        background: #131921;
         color: white;
-        padding: 20px 0;
-        margin-bottom: 30px;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        padding: 18px 0;
+        margin-bottom: 25px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.4);
     }
 
     .cart-title {
         color: white;
-        font-size: 32px;
+        font-size: 26px;
         font-weight: 700;
         margin: 0;
     }
 
     .cart-container {
         max-width: 1400px;
-        margin: 0 auto;
+        margin: 0 auto 40px;
         padding: 0 20px;
     }
 
+    /* Carte principale du panier */
+
     .cart-card {
-        background: white;
-        border: 1px solid #ddd;
-        border-radius: 8px;
-        padding: 20px;
-        margin-bottom: 20px;
+        background: #ffffff;
+        border: 1px solid #d5d9d9;
+        border-radius: 4px;
+        padding: 16px 18px;
+        margin-bottom: 16px;
+        box-shadow: 0 2px 4px rgba(15,17,17,0.1);
     }
 
     .cart-item {
         display: flex;
-        border-bottom: 1px solid #e7e7e7;
-        padding: 20px 0;
-        align-items: center;
+        border-bottom: 1px solid #e3e6e6;
+        padding: 16px 0;
+        align-items: flex-start;
     }
 
     .cart-item:last-child {
@@ -50,10 +54,10 @@
         width: 120px;
         height: 120px;
         object-fit: contain;
-        border: 1px solid #e7e7e7;
+        border: 1px solid #e3e6e6;
         border-radius: 4px;
-        padding: 10px;
-        background: white;
+        padding: 8px;
+        background: #ffffff;
     }
 
     .cart-details {
@@ -63,75 +67,83 @@
 
     .cart-product-name {
         color: #007185;
-        font-size: 18px;
+        font-size: 17px;
         font-weight: 600;
-        margin-bottom: 8px;
+        margin-bottom: 4px;
     }
 
     .cart-product-name:hover {
         color: #c7511f;
         cursor: pointer;
+        text-decoration: underline;
     }
 
     .cart-price {
-        color: #B12704;
-        font-size: 24px;
+        color: #b12704;
+        font-size: 20px;
         font-weight: 700;
     }
+
 
     .quantity-controls {
         display: flex;
         align-items: center;
         gap: 10px;
         justify-content: center;
-        margin-bottom: 15px;
+        margin-bottom: 10px;
     }
 
     .btn-quantity {
-        background-color: #f0f0f0;
-        border: 1px solid #d0d0d0;
+        background-color: #f0f2f2;
+        border: 1px solid #d5d9d9;
         color: #0f1111;
         font-weight: 700;
-        padding: 8px 16px;
-        border-radius: 6px;
+        border-radius: 50%;
         cursor: pointer;
-        transition: all 0.2s;
+        transition: background-color 0.15s, border-color 0.15s, transform 0.05s;
         font-size: 18px;
-        width: 40px;
-        height: 40px;
+        width: 32px;
+        height: 32px;
         display: flex;
         align-items: center;
         justify-content: center;
+        padding: 0;
     }
 
-    .btn-quantity:hover {
-        background-color: #e0e0e0;
+    .btn-quantity:hover:not(:disabled) {
+        background-color: #e3e6e6;
         border-color: #888c8c;
+        transform: translateY(-1px);
+    }
+
+    .btn-quantity:disabled {
+        background-color: #f7f8fa;
+        color: #a2a6ac;
+        border-color: #d5d9d9;
+        cursor: not-allowed;
     }
 
     .quantity-display {
-        width: 60px;
-        padding: 10px;
-        border: 2px solid #2c3e50;
-        border-radius: 6px;
+        min-width: 48px;
+        padding: 6px 8px;
+        border: 1px solid #d5d9d9;
+        border-radius: 4px;
         text-align: center;
         font-weight: 700;
-        font-size: 16px;
-        background: white;
-        color: #2c3e50;
-    }
-
-    .btn-update:hover {
-        background-color: #f7ca00;
+        font-size: 14px;
+        background: #ffffff;
+        color: #0f1111;
     }
 
     .btn-delete {
-        background-color: white;
+        background-color: transparent;
         border: 1px solid #d5d9d9;
         color: #0f1111;
-        padding: 8px 16px;
+        padding: 6px 12px;
         border-radius: 8px;
-        transition: all 0.2s;
+        font-size: 13px;
+        transition: background-color 0.15s, border-color 0.15s;
+        margin-top: 4px;
     }
 
     .btn-delete:hover {
@@ -140,17 +152,18 @@
     }
 
     .total-box {
-        background: white;
-        border: 1px solid #ddd;
-        border-radius: 8px;
-        padding: 30px;
+        background: #ffffff;
+        border: 1px solid #d5d9d9;
+        border-radius: 4px;
+        padding: 18px 18px 20px;
         position: sticky;
         top: 20px;
+        box-shadow: 0 2px 4px rgba(15,17,17,0.1);
     }
 
     .total-amount {
-        font-size: 28px;
-        color: #B12704;
+        font-size: 22px;
+        color: #b12704;
         font-weight: 700;
     }
 
@@ -159,27 +172,38 @@
         border: 1px solid #fcd200;
         color: #0f1111;
         font-weight: 600;
-        padding: 12px;
-        border-radius: 8px;
+        padding: 10px;
+        border-radius: 20px;
         width: 100%;
-        font-size: 16px;
-        transition: all 0.2s;
-        margin-top: 15px;
+        font-size: 15px;
+        transition: background-color 0.15s, box-shadow 0.15s, transform 0.05s;
+        margin-top: 12px;
     }
 
-    .btn-checkout:hover {
+    .btn-checkout:hover:not(:disabled) {
         background-color: #f7ca00;
+        box-shadow: 0 2px 5px rgba(15,17,17,0.15);
+        transform: translateY(-1px);
+    }
+
+    .btn-checkout:disabled {
+        background-color: #f7f8fa;
+        border-color: #d5d9d9;
+        color: #a2a6ac;
+        box-shadow: none;
+        transform: none;
     }
 
     .btn-continue {
-        background: white;
+        background: #ffffff;
         border: 1px solid #d5d9d9;
         color: #0f1111;
-        padding: 10px 20px;
-        border-radius: 8px;
+        padding: 8px 16px;
+        border-radius: 20px;
         text-decoration: none;
-        transition: all 0.2s;
+        transition: background-color 0.15s, border-color 0.15s;
         display: inline-block;
+        font-size: 14px;
     }
 
     .btn-continue:hover {
@@ -188,19 +212,39 @@
         color: #0f1111;
     }
 
+    /* Panier vide */
+
     .empty-cart {
-        background: white;
-        border-radius: 8px;
-        padding: 60px;
+        background: #ffffff;
+        border-radius: 4px;
+        padding: 50px 30px;
         text-align: center;
+        box-shadow: 0 2px 4px rgba(15,17,17,0.1);
+        border: 1px solid #d5d9d9;
     }
 
     .empty-cart-icon {
-        font-size: 80px;
+        font-size: 70px;
         color: #888c8c;
-        margin-bottom: 20px;
+        margin-bottom: 16px;
+    }
+
+    .alert-success {
+        border-radius: 4px;
+    }
+
+    @@media (max-width: 992px) {
+        .cart-item {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .cart-details {
+            padding: 10px 0;
+        }
     }
 </style>
+
 
 <!-- Header -->
 <div class="cart-header">
@@ -295,7 +339,7 @@
 
                 <div style="margin-top: 20px;">
                     <a asp-page="/Produit/Index" class="btn-continue">
-                        ← Continuer mes achats
+                      Continuer mes achats
                     </a>
                 </div>
             </div>
@@ -303,7 +347,7 @@
             <div class="col-lg-3">
                 <div class="total-box">
                     <div style="color: #007600; font-size: 14px; margin-bottom: 15px;">
-                        ✓ Votre commande est éligible à la livraison GRATUITE
+                        ✓ Votre commande est eligible a la livraison GRATUITE
                     </div>
                     
                     <div style="border-top: 1px solid #e7e7e7; padding-top: 15px;">
