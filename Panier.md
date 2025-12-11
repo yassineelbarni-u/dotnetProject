@@ -1,4 +1,4 @@
-# 🛒 Système de Panier Inspiré d'Amazon - Explication Complète
+# Système de Panier  - Explication Complète
 
 ## 📊 Modélisation de la Base de Données
 
