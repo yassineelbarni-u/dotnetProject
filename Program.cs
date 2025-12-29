@@ -14,8 +14,12 @@ builder.Services.AddSession(options =>
     options.Cookie.IsEssential = true;
 });
 
-// Mémoire cache pour optimiser les lectures (produits, catégories)
-builder.Services.AddMemoryCache();
+// Ajouter Redis comme cache distribué (au lieu de IMemoryCache local)
+builder.Services.AddStackExchangeRedisCache(options =>
+{
+    options.Configuration = "localhost:6379"; // Serveur Redis Docker
+    options.InstanceName = "ProjetTestDotNet_"; // Préfixe pour les clés
+});
 
 // DbContext + SQL Server
 builder.Services.AddDbContext<AppDbContext>(options =>

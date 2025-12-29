@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using ProjetTestDotNet.Data;
 using ProjetTestDotNet.Models;
 using ProduitModel = ProjetTestDotNet.Models.Produit;
-using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.Caching.Distributed;
 
 namespace ProjetTestDotNet.Pages.Produit
 {
@@ -12,9 +12,9 @@ namespace ProjetTestDotNet.Pages.Produit
     {
         private readonly AppDbContext _context;
         private readonly IWebHostEnvironment _environment;
-        private readonly IMemoryCache _cache;
+        private readonly IDistributedCache _cache;
 
-        public EditModel(AppDbContext context, IWebHostEnvironment environment, IMemoryCache cache)
+        public EditModel(AppDbContext context, IWebHostEnvironment environment, IDistributedCache cache)
         {
             _context = context;
             _environment = environment;
@@ -74,7 +74,8 @@ namespace ProjetTestDotNet.Pages.Produit
             produitToUpdate.Nom = Produit.Nom;
             produitToUpdate.Description = Produit.Description;
             produitToUpdate.Prix = Produit.Prix;
-
+           
+           // generer la mise a jour de l'image si un nouveau fichier est fourni
             if (ImageFile != null && ImageFile.Length > 0)
             {
                 var fileName = Guid.NewGuid().ToString() + Path.GetExtension(ImageFile.FileName);
@@ -90,16 +91,18 @@ namespace ProjetTestDotNet.Pages.Produit
 
             await _context.SaveChangesAsync();
 
-            // Invalider le cache produits et catégories affectés
-            _cache.Remove("Produits_Toutes");
-            _cache.Remove("Produits_Categories");
+            // Invalider le cache Redis produits et catégories affectés
+            await _cache.RemoveAsync("Produits_Toutes");
+            await _cache.RemoveAsync("Produits_Categories");
+            
+            // supprimer ancienne categorie
             if (!string.IsNullOrEmpty(oldCategorie))
             {
-                _cache.Remove($"Produits_Categorie_{oldCategorie}");
+                await _cache.RemoveAsync($"Produits_Categorie_{oldCategorie}");
             }
             if (!string.IsNullOrEmpty(Produit.Categorie))
             {
-                _cache.Remove($"Produits_Categorie_{Produit.Categorie}");
+                await _cache.RemoveAsync($"Produits_Categorie_{Produit.Categorie}");
             }
 
             TempData["Message"] = $"Le produit '{Produit.Nom}' a été modifié avec succès.";

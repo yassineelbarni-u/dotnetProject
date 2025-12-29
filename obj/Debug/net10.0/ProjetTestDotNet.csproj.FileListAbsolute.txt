@@ -278,3 +278,6 @@ C:\Users\USER1\ProjetTestDotNet\obj\Debug\net10.0\ProjetTe.6AA29760.Up2Date
 C:\Users\USER1\ProjetTestDotNet\obj\Debug\net10.0\ProjetTestDotNet.sourcelink.json
 C:\Users\USER1\ProjetTestDotNet\obj\Debug\net10.0\compressed\juqnbjvg6a-{0}-qvlpr8gvco-qvlpr8gvco.gz
 C:\Users\USER1\ProjetTestDotNet\obj\Debug\net10.0\compressed\25ek0devb2-{0}-qvlpr8gvco-qvlpr8gvco.gz
+C:\Users\USER1\ProjetTestDotNet\bin\Debug\net10.0\Microsoft.Extensions.Caching.StackExchangeRedis.dll
+C:\Users\USER1\ProjetTestDotNet\bin\Debug\net10.0\Pipelines.Sockets.Unofficial.dll
+C:\Users\USER1\ProjetTestDotNet\bin\Debug\net10.0\StackExchange.Redis.dll

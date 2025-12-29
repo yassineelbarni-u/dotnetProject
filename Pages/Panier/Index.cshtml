@@ -285,9 +285,9 @@
                     {
                         <div class="cart-item">
                             <div>
-                                @if (!string.IsNullOrEmpty(item.Produit?.Image))
+                                @if (!string.IsNullOrEmpty(item.ProduitImage))
                                 {
-                                    <img src="@item.Produit.Image" alt="@item.Produit.Nom" class="cart-image">
+                                    <img src="@item.ProduitImage" alt="@item.ProduitNom" class="cart-image">
                                 }
                                 else
                                 {
@@ -296,12 +296,12 @@
                             </div>
 
                             <div class="cart-details">
-                                <h5 class="cart-product-name">@item.Produit?.Nom</h5>
+                                <h5 class="cart-product-name">@item.ProduitNom</h5>
                                 <p style="color: #007600; font-size: 14px; margin-bottom: 8px;">
                                     <strong>✓</strong> En stock
                                 </p>
                                 <p style="color: #565959; font-size: 14px; margin-bottom: 10px;">
-                                    @item.Produit?.Description
+                                    @item.ProduitDescription
                                 </p>
                                 <div class="cart-price">€@item.PrixUnitaire.ToString("F2")</div>
                                 @* <p style="color: #888c8c; font-size: 12px; margin-top: 5px;">
@@ -321,7 +321,7 @@
                                     
                                     <form method="post" asp-page-handler="ModifierQuantite" asp-route-id="@item.Id" style="margin: 0;">
                                         <input type="hidden" name="quantite" value="@(item.Quantite + 1)" />
-                                        <button type="submit" class="btn-quantity" @(item.Quantite >= item.Produit.Stock ? "disabled" : "")>+</button>
+                                        <button type="submit" class="btn-quantity" @(item.Quantite >= item.ProduitStock ? "disabled" : "")>+</button>
                                     </form>
                                 </div>
                                 
@@ -330,7 +330,7 @@
                                 </form>
                                 
                                 <div style="margin-top: 15px; color: #565959; font-weight: 600;">
-                                    Sous-total: <span style="color: #B12704;">€@((item.PrixUnitaire * item.Quantite).ToString("F2"))</span>
+                                    Sous-total: <span style="color: #B12704;">€@(item.SousTotal.ToString("F2"))</span>
                                 </div>
                             </div>
                         </div>

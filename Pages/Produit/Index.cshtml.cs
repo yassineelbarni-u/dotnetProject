@@ -5,16 +5,17 @@ using ProjetTestDotNet.Data;
 using ProjetTestDotNet.Models;
 using ProduitModel = ProjetTestDotNet.Models.Produit;
 using PanierModel = ProjetTestDotNet.Models.Panier;
-using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.Caching.Distributed;
+using System.Text.Json;
 
 namespace ProjetTestDotNet.Pages.Produit
 {
     public class IndexModel : PageModel
     {
         private readonly AppDbContext _context;
-        private readonly IMemoryCache _cache;
+        private readonly IDistributedCache _cache;
 
-        public IndexModel(AppDbContext context, IMemoryCache cache)
+        public IndexModel(AppDbContext context, IDistributedCache cache)
         {
             _context = context;
             _cache = cache;
@@ -36,9 +37,12 @@ namespace ProjetTestDotNet.Pages.Produit
                 return RedirectToPage("/Admin/Dashboard");
             }
 
-            // Cacher la liste des categories
+            // Cacher la liste des catégories avec Redis
             var categoriesKey = "Produits_Categories";
-            if (!_cache.TryGetValue(categoriesKey, out List<string> categories))
+            var cachedCategories = await _cache.GetStringAsync(categoriesKey);
+            List<string> categories;
+            
+            if (cachedCategories == null)
             {
                 categories = await _context.Produits
                     .Where(p => !string.IsNullOrEmpty(p.Categorie))
@@ -47,13 +51,24 @@ namespace ProjetTestDotNet.Pages.Produit
                     .OrderBy(c => c)
                     .ToListAsync();
 
-                _cache.Set(categoriesKey, categories, TimeSpan.FromMinutes(10));
+                var serialized = JsonSerializer.Serialize(categories);
+                await _cache.SetStringAsync(categoriesKey, serialized, new DistributedCacheEntryOptions
+                {
+                    AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(10)
+                });
+            }
+            else
+            {
+                categories = JsonSerializer.Deserialize<List<string>>(cachedCategories) ?? new List<string>();
             }
             Categories = categories;
-            
-           // Cacher la liste des produits selon la categorie
+
+           // Cacher la liste des produits selon la catégorie avec Redis
             var produitsKey = $"Produits_Categorie_{(Categorie ?? "TOUTES")}";
-            if (!_cache.TryGetValue(produitsKey, out List<ProduitModel> produits))
+            var cachedProduits = await _cache.GetStringAsync(produitsKey);
+            List<ProduitModel> produits;
+            
+            if (cachedProduits == null)
             {
                 var query = _context.Produits.AsQueryable();
                 if (!string.IsNullOrEmpty(Categorie))
@@ -62,18 +77,42 @@ namespace ProjetTestDotNet.Pages.Produit
                 }
 
                 produits = await query.ToListAsync();
-                _cache.Set(produitsKey, produits, TimeSpan.FromMinutes(5));
+                var serialized = JsonSerializer.Serialize(produits);
+                await _cache.SetStringAsync(produitsKey, serialized, new DistributedCacheEntryOptions
+                {
+                    AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(5)
+                });
+            }
+            else
+            {
+                produits = JsonSerializer.Deserialize<List<ProduitModel>>(cachedProduits) ?? new List<ProduitModel>();
             }
 
             Produits = produits;
             
-
+            // Cache du nombre d'articles dans le panier avec Redis
             var sessionId = HttpContext.Session.GetString("SessionId");
             if (!string.IsNullOrEmpty(sessionId))
             {
-                NombreArticlesPanier = await _context.Paniers
-                    .Where(p => p.SessionId == sessionId)
-                    .SumAsync(p => p.Quantite);
+                var countKey = $"PanierCount_{sessionId}";
+                var cachedCount = await _cache.GetStringAsync(countKey);
+                int count;
+                
+                if (cachedCount == null)
+                {
+                    count = await _context.Paniers
+                        .Where(p => p.SessionId == sessionId)
+                        .SumAsync(p => p.Quantite);
+                    await _cache.SetStringAsync(countKey, count.ToString(), new DistributedCacheEntryOptions
+                    {
+                        AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(2)
+                    });
+                }
+                else
+                {
+                    count = int.Parse(cachedCount);
+                }
+                NombreArticlesPanier = count;
             }
             else
             {
@@ -135,6 +174,10 @@ namespace ProjetTestDotNet.Pages.Produit
 
             await _context.SaveChangesAsync();
             
+            // Invalider le cache Redis du panier et du compteur apres ajout d'article
+            await _cache.RemoveAsync($"Panier_{sessionId}");
+            await _cache.RemoveAsync($"PanierCount_{sessionId}");
+            
             return RedirectToPage();
         }
 
@@ -151,9 +194,9 @@ namespace ProjetTestDotNet.Pages.Produit
                 .Where(p => p.SessionId == sessionId)
                 .ToListAsync();
 
-            var items = paniers.Select(p => new
+            var items = paniers.Where(p => p.Produit != null).Select(p => new
             {
-                nom = p.Produit.Nom,
+                nom = p.Produit!.Nom,
                 quantite = p.Quantite,
                 prixUnitaire = p.PrixUnitaire,
                 sousTotal = p.Quantite * p.PrixUnitaire

@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using ProjetTestDotNet.Data;
 using ProjetTestDotNet.Models;
 using ProduitModel = ProjetTestDotNet.Models.Produit;
-using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.Caching.Distributed;
 
 namespace ProjetTestDotNet.Pages.Produit
 {
@@ -12,9 +12,9 @@ namespace ProjetTestDotNet.Pages.Produit
     {
         private readonly AppDbContext _context;
         private readonly IWebHostEnvironment _environment;
-        private readonly IMemoryCache _cache;
+        private readonly IDistributedCache _cache;
 
-        public CreateModel(AppDbContext context, IWebHostEnvironment environment, IMemoryCache cache)
+        public CreateModel(AppDbContext context, IWebHostEnvironment environment, IDistributedCache cache)
         {
             _context = context;
             _environment = environment;
@@ -66,11 +66,13 @@ namespace ProjetTestDotNet.Pages.Produit
 
             _context.Produits.Add(Produit);
             await _context.SaveChangesAsync();
-            _cache.Remove("Produits_Toutes");
-            _cache.Remove("Produits_Categories");
+            
+            // Invalider le cache Redis produits/catégories affectés
+            await _cache.RemoveAsync("Produits_Toutes");
+            await _cache.RemoveAsync("Produits_Categories");
             if (!string.IsNullOrEmpty(Produit.Categorie))
             {
-                _cache.Remove($"Produits_Categorie_{Produit.Categorie}");
+                await _cache.RemoveAsync($"Produits_Categorie_{Produit.Categorie}");
             }
 
             TempData["Message"] = $"Le produit '{Produit.Nom}' a ete ajoute avec succes !";
