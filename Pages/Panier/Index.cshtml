@@ -246,7 +246,6 @@
 </style>
 
 
-<!-- Header -->
 <div class="cart-header">
     <div class="cart-container">
         <h1 class="cart-title">🛒 Mon Panier</h1>
@@ -305,13 +304,14 @@
                                     @item.Produit?.Description
                                 </p>
                                 <div class="cart-price">€@item.PrixUnitaire.ToString("F2")</div>
-                                <p style="color: #888c8c; font-size: 12px; margin-top: 5px;">
+                                @* <p style="color: #888c8c; font-size: 12px; margin-top: 5px;">
                                     Prix garanti au moment de l'ajout
-                                </p>
+                                </p> *@
                             </div>
 
                             <div style="text-align: center;">
                                 <div class="quantity-controls">
+                                    @*directive  Razor page pour modifier la quantité *@
                                     <form method="post" asp-page-handler="ModifierQuantite" asp-route-id="@item.Id" style="margin: 0;">
                                         <input type="hidden" name="quantite" value="@(item.Quantite - 1)" />
                                         <button type="submit" class="btn-quantity" @(item.Quantite <= 1 ? "disabled" : "")>−</button>
@@ -337,11 +337,11 @@
                     }
                 </div>
 
-                <div style="margin-top: 20px;">
+                @* <div style="margin-top: 20px;">
                     <a asp-page="/Produit/Index" class="btn-continue">
                       Continuer mes achats
                     </a>
-                </div>
+                </div> *@
             </div>
 
             <div class="col-lg-3">

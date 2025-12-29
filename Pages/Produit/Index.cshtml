@@ -411,7 +411,7 @@
 <div class="shop-container">
     <aside class="sidebar">
         <div class="category-section">
-            <h3 class="category-title">Catégories</h3>
+            <h3 class="category-title">categorie</h3>
             <nav>
                 <a asp-page="/Produit/Index" class="category-item @(string.IsNullOrEmpty(Model.Categorie) ? "active" : "")">
                     Tous les produits
@@ -451,11 +451,11 @@
                         
                         @if (p.Stock > 0)
                         {
-                            <div class="product-stock-mini" style="color: #00b300;">✓ Qty: @p.Stock</div>
+                            <div class="product-stock-mini" style="color: #00b300;"> Qty: @p.Stock</div>
                         }
                         else
                         {
-                            <div class="product-stock-mini" style="color: #ff3b30;">✗ Rupture</div>
+                            <div class="product-stock-mini" style="color: #ff3b30;"> pas disponible</div>
                         }
                         
                         <div class="product-price-mini">$@p.Prix.ToString("F0")</div>

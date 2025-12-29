@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using ProjetTestDotNet.Data;
 using ProjetTestDotNet.Models;
 using ProduitModel = ProjetTestDotNet.Models.Produit;
+using Microsoft.Extensions.Caching.Memory;
 
 namespace ProjetTestDotNet.Pages.Produit
 {
@@ -11,10 +12,13 @@ namespace ProjetTestDotNet.Pages.Produit
     {
         private readonly AppDbContext _context;
         private readonly IWebHostEnvironment _environment;
-        public CreateModel(AppDbContext context, IWebHostEnvironment environment)
+        private readonly IMemoryCache _cache;
+
+        public CreateModel(AppDbContext context, IWebHostEnvironment environment, IMemoryCache cache)
         {
             _context = context;
             _environment = environment;
+            _cache = cache;
         }
 
         [BindProperty]
@@ -62,6 +66,12 @@ namespace ProjetTestDotNet.Pages.Produit
 
             _context.Produits.Add(Produit);
             await _context.SaveChangesAsync();
+            _cache.Remove("Produits_Toutes");
+            _cache.Remove("Produits_Categories");
+            if (!string.IsNullOrEmpty(Produit.Categorie))
+            {
+                _cache.Remove($"Produits_Categorie_{Produit.Categorie}");
+            }
 
             TempData["Message"] = $"Le produit '{Produit.Nom}' a ete ajoute avec succes !";
             return RedirectToPage("/Admin/Dashboard");

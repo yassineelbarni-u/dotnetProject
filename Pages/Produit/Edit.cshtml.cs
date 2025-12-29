@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using ProjetTestDotNet.Data;
 using ProjetTestDotNet.Models;
 using ProduitModel = ProjetTestDotNet.Models.Produit;
+using Microsoft.Extensions.Caching.Memory;
 
 namespace ProjetTestDotNet.Pages.Produit
 {
@@ -11,11 +12,13 @@ namespace ProjetTestDotNet.Pages.Produit
     {
         private readonly AppDbContext _context;
         private readonly IWebHostEnvironment _environment;
+        private readonly IMemoryCache _cache;
 
-        public EditModel(AppDbContext context, IWebHostEnvironment environment)
+        public EditModel(AppDbContext context, IWebHostEnvironment environment, IMemoryCache cache)
         {
             _context = context;
             _environment = environment;
+            _cache = cache;
         }
 
         [BindProperty]
@@ -65,6 +68,9 @@ namespace ProjetTestDotNet.Pages.Produit
                 return RedirectToPage("/Admin/Dashboard");
             }
 
+            // Garder l'ancienne catégorie pour invalider le cache si besoin
+            var oldCategorie = produitToUpdate.Categorie;
+
             produitToUpdate.Nom = Produit.Nom;
             produitToUpdate.Description = Produit.Description;
             produitToUpdate.Prix = Produit.Prix;
@@ -83,6 +89,18 @@ namespace ProjetTestDotNet.Pages.Produit
             }
 
             await _context.SaveChangesAsync();
+
+            // Invalider le cache produits et catégories affectés
+            _cache.Remove("Produits_Toutes");
+            _cache.Remove("Produits_Categories");
+            if (!string.IsNullOrEmpty(oldCategorie))
+            {
+                _cache.Remove($"Produits_Categorie_{oldCategorie}");
+            }
+            if (!string.IsNullOrEmpty(Produit.Categorie))
+            {
+                _cache.Remove($"Produits_Categorie_{Produit.Categorie}");
+            }
 
             TempData["Message"] = $"Le produit '{Produit.Nom}' a été modifié avec succès.";
             return RedirectToPage("/Admin/Dashboard");

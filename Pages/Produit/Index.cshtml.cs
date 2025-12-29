@@ -5,16 +5,19 @@ using ProjetTestDotNet.Data;
 using ProjetTestDotNet.Models;
 using ProduitModel = ProjetTestDotNet.Models.Produit;
 using PanierModel = ProjetTestDotNet.Models.Panier;
+using Microsoft.Extensions.Caching.Memory;
 
 namespace ProjetTestDotNet.Pages.Produit
 {
     public class IndexModel : PageModel
     {
         private readonly AppDbContext _context;
+        private readonly IMemoryCache _cache;
 
-        public IndexModel(AppDbContext context)
+        public IndexModel(AppDbContext context, IMemoryCache cache)
         {
             _context = context;
+            _cache = cache;
         }
         
         public List<ProduitModel> Produits { get; set; } = new();
@@ -33,21 +36,36 @@ namespace ProjetTestDotNet.Pages.Produit
                 return RedirectToPage("/Admin/Dashboard");
             }
 
-            Categories = await _context.Produits
-                .Where(p => !string.IsNullOrEmpty(p.Categorie))
-                .Select(p => p.Categorie!)
-                .Distinct()
-                .OrderBy(c => c)
-                .ToListAsync();
-
-            var query = _context.Produits.AsQueryable();
-            
-            if (!string.IsNullOrEmpty(Categorie))
+            // Cacher la liste des categories
+            var categoriesKey = "Produits_Categories";
+            if (!_cache.TryGetValue(categoriesKey, out List<string> categories))
             {
-                query = query.Where(p => p.Categorie == Categorie);
+                categories = await _context.Produits
+                    .Where(p => !string.IsNullOrEmpty(p.Categorie))
+                    .Select(p => p.Categorie!)
+                    .Distinct()
+                    .OrderBy(c => c)
+                    .ToListAsync();
+
+                _cache.Set(categoriesKey, categories, TimeSpan.FromMinutes(10));
+            }
+            Categories = categories;
+            
+           // Cacher la liste des produits selon la categorie
+            var produitsKey = $"Produits_Categorie_{(Categorie ?? "TOUTES")}";
+            if (!_cache.TryGetValue(produitsKey, out List<ProduitModel> produits))
+            {
+                var query = _context.Produits.AsQueryable();
+                if (!string.IsNullOrEmpty(Categorie))
+                {
+                    query = query.Where(p => p.Categorie == Categorie);
+                }
+
+                produits = await query.ToListAsync();
+                _cache.Set(produitsKey, produits, TimeSpan.FromMinutes(5));
             }
 
-            Produits = await query.ToListAsync();
+            Produits = produits;
             
 
             var sessionId = HttpContext.Session.GetString("SessionId");
