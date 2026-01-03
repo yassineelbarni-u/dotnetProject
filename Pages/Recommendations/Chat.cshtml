@@ -1,0 +1,150 @@
+@page
+@model ProjetTestDotNet.Pages.Recommendations.ChatModel
+@{
+    ViewData["Title"] = "Recommandations IA (Ollama)";
+}
+
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow-lg">
+                <div class="card-header bg-gradient text-white">
+                    <h3 class="mb-0">🤖 Assistant de Recommandation IA</h3>
+                </div>
+                <div class="card-body">
+                    
+                    <div class="alert alert-success d-flex align-items-center">
+                        <span class="status-indicator"></span>
+                        <div>
+                            <strong>Assistant de Recommandation IA </strong>
+                        </div>
+                    </div>
+
+                    <div class="alert alert-info">
+                        <strong>Exemples de questions :</strong>
+                        <ul class="mb-0 mt-2">
+                            <li>Quels produits coûtent moins de 50€ ?</li>
+                            <li>Recommande-moi des produits de la catégorie électronique</li>
+                            <li>Quel est le produit le moins cher ?</li>
+                            <li>Montre-moi les produits en stock avec un bon prix</li>
+                        </ul>
+                    </div>
+
+                    <form method="post">
+                        <div class="mb-3">
+                            <label asp-for="UserMessage" class="form-label fw-bold">Posez votre question :</label>
+                            <textarea asp-for="UserMessage" 
+                                      class="form-control" 
+                                      rows="3" 
+                                      placeholder="Ex: Quels sont les meilleurs produits à moins de 100€ ?"
+                                      required></textarea>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary w-100 btn-lg">
+                            <span class="spinner-border spinner-border-sm me-2 d-none" role="status" aria-hidden="true"></span>
+                             envoyer
+                        </button>
+                    </form>
+
+                    @if (!string.IsNullOrEmpty(Model.BotResponse))
+                    {
+                        <hr class="my-4" />
+                        <div class="card bg-light border-success">
+                            <div class="card-header bg-success text-white d-flex align-items-center">
+                                <span class="me-2">🤖</span>
+                                <strong>Recommandations de l'IA</strong>
+                            </div>
+                            <div class="card-body">
+                                <div class="bot-response">
+                                    @{
+                                        var lines = Model.BotResponse.Split('\n');
+                                        foreach (var line in lines)
+                                        {
+                                            if (line.StartsWith("**") && line.EndsWith("**"))
+                                            {
+                                                var text = line.Trim('*');
+                                                <h5 class="text-primary">@text</h5>
+                                            }
+                                            else if (line.StartsWith("- "))
+                                            {
+                                                <p class="mb-1">• @line.Substring(2)</p>
+                                            }
+                                            else if (!string.IsNullOrWhiteSpace(line))
+                                            {
+                                                <p class="mb-2">@line</p>
+                                            }
+                                        }
+                                    }
+                                </div>
+                                
+                                <div class="mt-4 d-flex gap-2">
+                                    <a asp-page="/Produit/Index" class="btn btn-outline-primary">
+                                        📦 Voir tous les produits
+                                    </a>
+                                    <a asp-page="/Panier/Index" class="btn btn-outline-success">
+                                        🛒 Mon panier
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <div class="text-center mt-3">
+                <a asp-page="/Produit/Index" class="text-muted">← Retour à la liste des produits</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .bg-gradient {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+    
+    .bot-response {
+        font-size: 1.05rem;
+        line-height: 1.7;
+        color: #333;
+    }
+    
+    .bot-response h5 {
+        margin-top: 1rem;
+        margin-bottom: 0.5rem;
+    }
+    
+    .status-indicator {
+        width: 12px;
+        height: 12px;
+        background-color: #28a745;
+        border-radius: 50%;
+        display: inline-block;
+        margin-right: 10px;
+        animation: pulse 2s infinite;
+    }
+    
+    @@keyframes pulse {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.5; }
+    }
+    
+    .card {
+        border-radius: 10px;
+    }
+    
+    .card-header {
+        border-radius: 10px 10px 0 0 !important;
+    }
+</style>
+
+<script>
+    // Animation de chargement lors de la soumission
+    document.querySelector('form').addEventListener('submit', function() {
+        const btn = this.querySelector('button[type="submit"]');
+        const spinner = btn.querySelector('.spinner-border');
+        spinner.classList.remove('d-none');
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span> Génération en cours...';
+    });
+</script>

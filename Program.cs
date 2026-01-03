@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using ProjetTestDotNet.Data;
+using ProjetTestDotNet.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -20,6 +21,10 @@ builder.Services.AddStackExchangeRedisCache(options =>
     options.InstanceName = "ProjetTestDotNet_";
 });
 
+// Service de recommandation IA (Ollama et RAG)
+builder.Services.AddHttpClient();
+builder.Services.AddScoped<IRecommendationService, OllamaRecommendationService>();
+
 // DbContext + SQL Server
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
@@ -36,7 +41,7 @@ if (!app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 app.UseRouting();
 
-// Activer les sessions (OBLIGATOIRE pour le login)
+// Activer les sessions
 app.UseSession();
 
 app.UseAuthorization();

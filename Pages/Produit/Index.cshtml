@@ -411,8 +411,13 @@
 <div class="shop-container">
     <aside class="sidebar">
         <div class="category-section">
-            <h3 class="category-title">categorie</h3>
+            <h3 class="category-title">🤖 IA</h3>
             <nav>
+                <a asp-page="/Recommendations/Chat" class="category-item" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; font-weight: bold; text-align: center; padding: 12px; margin-bottom: 15px;">
+                    🤖 Recommandations IA
+                </a>
+                
+                <h3 class="category-title">Catégories</h3>
                 <a asp-page="/Produit/Index" class="category-item @(string.IsNullOrEmpty(Model.Categorie) ? "active" : "")">
                     Tous les produits
                 </a>
