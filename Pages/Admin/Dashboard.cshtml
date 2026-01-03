@@ -2,7 +2,7 @@
 @model ProjetTestDotNet.Pages.Admin.DashboardModel
 
 @{
-    var adminUsername = HttpContext.Session.GetString("AdminUsername");
+    var adminUsername = Request.Cookies["AdminUsername"];
     if (string.IsNullOrEmpty(adminUsername))
     {
         Response.Redirect("/Admin/Login");

@@ -6,19 +6,11 @@ var builder = WebApplication.CreateBuilder(args);
 // Services
 builder.Services.AddRazorPages();
 
-// Ajouter les sessions pour l'authentification admin
-builder.Services.AddSession(options =>
-{
-    options.IdleTimeout = TimeSpan.FromMinutes(30);
-    options.Cookie.HttpOnly = true;
-    options.Cookie.IsEssential = true;
-});
-
-// Ajouter Redis comme cache distribué (au lieu de IMemoryCache local)
+// Ajouter Redis uniquement pour le cache (pas pour les sessions)
 builder.Services.AddStackExchangeRedisCache(options =>
 {
-    options.Configuration = "localhost:6379"; // Serveur Redis Docker
-    options.InstanceName = "ProjetTestDotNet_"; // Préfixe pour les clés
+    options.Configuration = "localhost:6379";
+    options.InstanceName = "ProjetTestDotNet_";
 });
 
 // DbContext + SQL Server
@@ -36,7 +28,6 @@ if (!app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.UseRouting();
-app.UseSession();
 app.UseAuthorization();
 
 app.MapStaticAssets();

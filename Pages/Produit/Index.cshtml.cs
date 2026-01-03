@@ -31,7 +31,7 @@ namespace ProjetTestDotNet.Pages.Produit
         public async Task<IActionResult> OnGetAsync()
         {
 
-            var adminId = HttpContext.Session.GetString("AdminId");
+            var adminId = Request.Cookies["AdminId"];
             if (!string.IsNullOrEmpty(adminId))
             {
                 return RedirectToPage("/Admin/Dashboard");
@@ -91,7 +91,7 @@ namespace ProjetTestDotNet.Pages.Produit
             Produits = produits;
             
             // Cache du nombre d'articles dans le panier avec Redis
-            var sessionId = HttpContext.Session.GetString("SessionId");
+            var sessionId = Request.Cookies["SessionId"];
             if (!string.IsNullOrEmpty(sessionId))
             {
                 var countKey = $"PanierCount_{sessionId}";
@@ -100,9 +100,20 @@ namespace ProjetTestDotNet.Pages.Produit
                 
                 if (cachedCount == null)
                 {
-                    count = await _context.Paniers
-                        .Where(p => p.SessionId == sessionId)
-                        .SumAsync(p => p.Quantite);
+                    // Lire depuis Redis
+                    var panierKey = $"Panier_{sessionId}";
+                    var cachedData = await _cache.GetStringAsync(panierKey);
+                    
+                    if (cachedData != null)
+                    {
+                        var articles = JsonSerializer.Deserialize<List<ProjetTestDotNet.DTOs.PanierItemDTO>>(cachedData);
+                        count = articles?.Sum(a => a.Quantite) ?? 0;
+                    }
+                    else
+                    {
+                        count = 0;
+                    }
+                    
                     await _cache.SetStringAsync(countKey, count.ToString(), new DistributedCacheEntryOptions
                     {
                         AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(2)
@@ -136,46 +147,69 @@ namespace ProjetTestDotNet.Pages.Produit
                 return RedirectToPage();
             }
 
-            var sessionId = HttpContext.Session.GetString("SessionId");
+            var sessionId = Request.Cookies["SessionId"];
             if (string.IsNullOrEmpty(sessionId))
             {
                 sessionId = Guid.NewGuid().ToString();
-                HttpContext.Session.SetString("SessionId", sessionId);
+                Response.Cookies.Append("SessionId", sessionId, new CookieOptions
+                {
+                    HttpOnly = true,
+                    Secure = true,
+                    SameSite = SameSiteMode.Lax,
+                    Expires = DateTimeOffset.UtcNow.AddDays(30)
+                });
             }
 
-            var panierExistant = await _context.Paniers
-                .FirstOrDefaultAsync(p => p.ProduitId == id && p.SessionId == sessionId);
+            // Recuperer le panier depuis Redis
+            var panierKey = $"Panier_{sessionId}";
+            var cachedData = await _cache.GetStringAsync(panierKey);
+            List<ProjetTestDotNet.DTOs.PanierItemDTO> articles;
 
-            if (panierExistant != null)
+            if (cachedData != null)
             {
+                articles = JsonSerializer.Deserialize<List<ProjetTestDotNet.DTOs.PanierItemDTO>>(cachedData) ?? new();
+            }
+            else
+            {
+                articles = new List<ProjetTestDotNet.DTOs.PanierItemDTO>();
+            }
 
-                if (panierExistant.Quantite >= produit.Stock)
+            // Verifier si le produit existe dejà dans le panier
+            var articleExistant = articles.FirstOrDefault(a => a.ProduitId == id);
+
+            if (articleExistant != null)
+            {
+                if (articleExistant.Quantite >= produit.Stock)
                 {
                     TempData["Error"] = $"Stock insuffisant. Maximum disponible : {produit.Stock} unité(s).";
                     return RedirectToPage();
                 }
-                panierExistant.Quantite++;
+                articleExistant.Quantite++;
+                articleExistant.ProduitStock = produit.Stock;
             }
             else
             {
-
-                var nouveauPanier = new PanierModel
+                // Ajouter un nouvel article au panier
+                articles.Add(new ProjetTestDotNet.DTOs.PanierItemDTO
                 {
-                    SessionId = sessionId,
-                    UserId = null,
+                    Id = articles.Count + 1,
                     ProduitId = id,
+                    ProduitNom = produit.Nom,
+                    ProduitImage = produit.Image,
+                    ProduitDescription = produit.Description,
+                    ProduitStock = produit.Stock,
                     Quantite = 1,
-                    PrixUnitaire = produit.Prix,
-                    DateAjout = DateTime.Now,
-                    DateExpiration = DateTime.Now.AddDays(90)
-                };
-                _context.Paniers.Add(nouveauPanier);
+                    PrixUnitaire = produit.Prix
+                });
             }
 
-            await _context.SaveChangesAsync();
-            
-            // Invalider le cache Redis du panier et du compteur apres ajout d'article
-            await _cache.RemoveAsync($"Panier_{sessionId}");
+            var serialized = JsonSerializer.Serialize(articles);
+            await _cache.SetStringAsync(panierKey, serialized, new DistributedCacheEntryOptions
+            {
+                AbsoluteExpirationRelativeToNow = TimeSpan.FromDays(7)
+            });
+
+            // Invalider le cache du compteur
             await _cache.RemoveAsync($"PanierCount_{sessionId}");
             
             return RedirectToPage();
@@ -183,26 +217,32 @@ namespace ProjetTestDotNet.Pages.Produit
 
         public async Task<IActionResult> OnGetCartPreviewAsync()
         {
-            var sessionId = HttpContext.Session.GetString("SessionId");
+            var sessionId = Request.Cookies["SessionId"];
             if (string.IsNullOrEmpty(sessionId))
             {
                 return new JsonResult(new { items = new List<object>(), total = 0 });
             }
 
-            var paniers = await _context.Paniers
-                .Include(p => p.Produit)
-                .Where(p => p.SessionId == sessionId)
-                .ToListAsync();
-
-            var items = paniers.Where(p => p.Produit != null).Select(p => new
+            // Lire depuis Redis uniquement
+            var panierKey = $"Panier_{sessionId}";
+            var cachedData = await _cache.GetStringAsync(panierKey);
+            
+            if (cachedData == null)
             {
-                nom = p.Produit!.Nom,
-                quantite = p.Quantite,
-                prixUnitaire = p.PrixUnitaire,
-                sousTotal = p.Quantite * p.PrixUnitaire
+                return new JsonResult(new { items = new List<object>(), total = 0 });
+            }
+
+            var articles = JsonSerializer.Deserialize<List<ProjetTestDotNet.DTOs.PanierItemDTO>>(cachedData) ?? new();
+
+            var items = articles.Select(a => new
+            {
+                nom = a.ProduitNom,
+                quantite = a.Quantite,
+                prixUnitaire = a.PrixUnitaire,
+                sousTotal = a.SousTotal
             }).ToList();
 
-            var total = paniers.Sum(p => p.Quantite * p.PrixUnitaire);
+            var total = articles.Sum(a => a.SousTotal);
 
             return new JsonResult(new { items, total });
         }

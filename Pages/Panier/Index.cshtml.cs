@@ -1,8 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using Microsoft.EntityFrameworkCore;
 using ProjetTestDotNet.Data;
-using PanierModel = ProjetTestDotNet.Models.Panier;
 using Microsoft.Extensions.Caching.Distributed;
 using System.Text.Json;
 using ProjetTestDotNet.DTOs;
@@ -25,64 +23,43 @@ namespace ProjetTestDotNet.Pages.Panier
 
         public async Task OnGetAsync()
         {
-            var sessionId = HttpContext.Session.GetString("SessionId");
+            // Utiliser un cookie au lieu de Session pour stocker le SessionId
+            var sessionId = Request.Cookies["SessionId"];
+
+            // Creer un SessionId si inexistant
+            if (string.IsNullOrEmpty(sessionId))
+            {
+                sessionId = Guid.NewGuid().ToString();
+                Response.Cookies.Append("SessionId", sessionId, new CookieOptions
+                {
+                    HttpOnly = true,
+                    Secure = true,
+                    SameSite = SameSiteMode.Lax,
+                    Expires = DateTimeOffset.UtcNow.AddDays(30)
+                });
+            }
             
             if (!string.IsNullOrEmpty(sessionId))
             {
-                // Cacher les articles du panier avec Redis (en utilisant des DTOs)
+                // Lire le panier depuis Redis uniquement
                 var panierKey = $"Panier_{sessionId}";
-
-                // Lecture depuis Redis
                 var cachedData = await _cache.GetStringAsync(panierKey);
-                List<PanierItemDTO> articles;
                 
-                if (cachedData == null)
+                if (cachedData != null)
                 {
-
-                    // Cache MISS charger depuis la base de donnees
-                    Console.WriteLine($"REDIS CACHE MISS  Chargement panier depuis la base pour session: {sessionId.Substring(0, 8)}...");
-                    
-                    // Charger les entités completes depuis la base
-                    var paniersDb = await _context.Paniers
-                        .Include(p => p.Produit)
-                        .Where(p => p.SessionId == sessionId)
-                        .ToListAsync();
-
-                    // mapping  Entité -> DTO ne garder que les donnees necessaires
-                    articles = paniersDb.Select(p => new PanierItemDTO
-                    {
-                        Id = p.Id,
-                        Quantite = p.Quantite,
-                        PrixUnitaire = p.PrixUnitaire,
-                        ProduitId = p.ProduitId,
-                        ProduitNom = p.Produit?.Nom,
-                        ProduitImage = p.Produit?.Image,
-                        ProduitDescription = p.Produit?.Description,
-                        ProduitStock = p.Produit?.Stock ?? 0
-                    }).ToList();
-
-                    // Serialiser le DTO plus leger que l'entite complete et mettre en cache Redis
-                    var serialized = JsonSerializer.Serialize(articles);
-                    await _cache.SetStringAsync(panierKey, serialized, new DistributedCacheEntryOptions
-                    {
-                        AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(2)
-                    });
-                    Console.WriteLine($"Panier (DTO) mis en cache Redis (2 min) - {articles.Count} articles");
+                    ArticlesPanier = JsonSerializer.Deserialize<List<PanierItemDTO>>(cachedData) ?? new();
+                    Console.WriteLine($"REDIS CACHE HIT - Panier lu depuis Redis ({ArticlesPanier.Count} articles)");
                 }
                 else
                 {
-                    // Cache HIT  utiliser les donnees de Redis (deja en format DTO)
-                    articles = JsonSerializer.Deserialize<List<PanierItemDTO>>(cachedData) ?? new List<PanierItemDTO>();
-                    Console.WriteLine($"REDIS CACHE HIT - Panier (DTO) lu depuis Redis ({articles.Count} articles)");
+                    ArticlesPanier = new List<PanierItemDTO>();
+                    Console.WriteLine($"Panier vide pour session: {sessionId.Substring(0, 8)}...");
                 }
             
-                // Affecter les articles du panier et calculer le total
-                ArticlesPanier = articles;
                 Total = ArticlesPanier.Sum(a => a.SousTotal);
             }
             else
             {
-                // Pas de session - panier vide
                 ArticlesPanier = new List<PanierItemDTO>();
                 Total = 0;
             }
@@ -90,8 +67,8 @@ namespace ProjetTestDotNet.Pages.Panier
 
         public async Task<IActionResult> OnPostSupprimerAsync(int id)
         {
-            //Recupere l’identifiant unique de la session utilisateur.
-            var sessionId = HttpContext.Session.GetString("SessionId");
+            //Recupere l'identifiant unique depuis le cookie.
+            var sessionId = Request.Cookies["SessionId"];
             var panier = await _context.Paniers.FindAsync(id);
             
             // Verifie que l’article existe et qu'il appartient bien a la session actuelle
@@ -100,7 +77,6 @@ namespace ProjetTestDotNet.Pages.Panier
                 _context.Paniers.Remove(panier);
                 await _context.SaveChangesAsync();
                 
-                // Invalider le cache Redis du panier et du compteur apres suppression
                 await _cache.RemoveAsync($"Panier_{sessionId}");
                 await _cache.RemoveAsync($"PanierCount_{sessionId}");
                 
@@ -112,23 +88,36 @@ namespace ProjetTestDotNet.Pages.Panier
 
         public async Task<IActionResult> OnPostModifierQuantiteAsync(int id, int quantite)
         {
-            var sessionId = HttpContext.Session.GetString("SessionId");
-            var panier = await _context.Paniers.FindAsync(id);
-            
-            if (panier != null && panier.SessionId == sessionId && quantite > 0)
+            var sessionId = Request.Cookies["SessionId"];
+            if (string.IsNullOrEmpty(sessionId) || quantite <= 0)
             {
-                panier.Quantite = quantite;
-                await _context.SaveChangesAsync();
+                return RedirectToPage();
+            }
+            
+            // Lire le panier depuis Redis
+            var panierKey = $"Panier_{sessionId}";
+            var cachedData = await _cache.GetStringAsync(panierKey);
+            
+            if (cachedData != null)
+            {
+                var articles = JsonSerializer.Deserialize<List<PanierItemDTO>>(cachedData) ?? new();
                 
-                // Invalider le cache Redis du panier et du compteur après modification de quantité
-                await _cache.RemoveAsync($"Panier_{sessionId}");
-                await _cache.RemoveAsync($"PanierCount_{sessionId}");
-                if (!string.IsNullOrEmpty(sessionId))
+                // Modifier la quantite
+                var article = articles.FirstOrDefault(a => a.Id == id);
+                if (article != null)
                 {
+                    article.Quantite = quantite;
+                    
+                    var serialized = JsonSerializer.Serialize(articles);
+                    await _cache.SetStringAsync(panierKey, serialized, new DistributedCacheEntryOptions
+                    {
+                        AbsoluteExpirationRelativeToNow = TimeSpan.FromDays(7)
+                    });
+                    
+                    await _cache.RemoveAsync($"PanierCount_{sessionId}");
+                    
                     Console.WriteLine($"Cache Redis invalide apres modification de quantite (session: {sessionId.Substring(0, 8)}...)");
                 }
-                
-                // TempData["Message"] = "Quantite mise a jour";
             }
 
             return RedirectToPage();

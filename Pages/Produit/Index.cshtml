@@ -2,7 +2,7 @@
 @model ProjetTestDotNet.Pages.Produit.IndexModel
 
 @{
-    var adminUsername = HttpContext.Session.GetString("AdminUsername");
+    var adminUsername = Request.Cookies["AdminUsername"];
 }
 
 <style>
