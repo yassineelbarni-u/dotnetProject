@@ -19,6 +19,7 @@ namespace ProjetTestDotNet.Pages.Panier
             _cache = cache;
         }
 
+        // Liste des articles dans le panier
         public List<PanierItemDTO> ArticlesPanier { get; set; } = new();
         public decimal Total { get; set; }
 
@@ -42,12 +43,14 @@ namespace ProjetTestDotNet.Pages.Panier
             
             if (!string.IsNullOrEmpty(sessionId))
             {
-                // Lire le panier depuis Redis uniquement
+                // Lire le panier depuis Redis
                 var panierKey = $"Panier_{sessionId}";
+                // recuperer les donnees serialisees JSON
                 var cachedData = await _cache.GetStringAsync(panierKey);
                 
                 if (cachedData != null)
                 {
+                    // Deserialiser les donnees JSON en liste d'articles (C# OBJECT)
                     ArticlesPanier = JsonSerializer.Deserialize<List<PanierItemDTO>>(cachedData) ?? new();
                     Console.WriteLine($"REDIS CACHE HIT - Panier lu depuis Redis ({ArticlesPanier.Count} articles)");
                 }
@@ -73,8 +76,9 @@ namespace ProjetTestDotNet.Pages.Panier
             
             if (!string.IsNullOrEmpty(sessionId))
             {
-                // Lire le panier depuis Redis
+                // constructeur de la cle Redis
                 var panierKey = $"Panier_{sessionId}";
+                // Lire le panier depuis Redis
                 var cachedData = await _cache.GetStringAsync(panierKey);
                 
                 if (cachedData != null)
