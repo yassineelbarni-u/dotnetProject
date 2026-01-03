@@ -4,7 +4,6 @@ using Microsoft.EntityFrameworkCore;
 using ProjetTestDotNet.Data;
 using ProjetTestDotNet.Models;
 using ProduitModel = ProjetTestDotNet.Models.Produit;
-using PanierModel = ProjetTestDotNet.Models.Panier;
 using Microsoft.Extensions.Caching.Distributed;
 using System.Text.Json;
 

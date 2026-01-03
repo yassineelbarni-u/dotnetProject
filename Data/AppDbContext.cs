@@ -13,7 +13,6 @@ namespace ProjetTestDotNet.Data
 
         public DbSet<Employe> Employes { get; set; }
         public DbSet<Produit> Produits { get; set; }
-        public DbSet<Panier> Paniers { get; set; }
         public DbSet<Admin> Admins { get; set; }
     }
 }

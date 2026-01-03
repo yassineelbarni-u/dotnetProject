@@ -7,6 +7,7 @@ using ProjetTestDotNet.DTOs;
 
 namespace ProjetTestDotNet.Pages.Panier
 {
+
     public class IndexModel : PageModel
     {
         private readonly AppDbContext _context;
@@ -23,7 +24,7 @@ namespace ProjetTestDotNet.Pages.Panier
 
         public async Task OnGetAsync()
         {
-            // Utiliser un cookie au lieu de Session pour stocker le SessionId
+            // Recuperer l'identifiant unique depuis le cookie
             var sessionId = Request.Cookies["SessionId"];
 
             // Creer un SessionId si inexistant
@@ -69,18 +70,35 @@ namespace ProjetTestDotNet.Pages.Panier
         {
             //Recupere l'identifiant unique depuis le cookie.
             var sessionId = Request.Cookies["SessionId"];
-            var panier = await _context.Paniers.FindAsync(id);
             
-            // Verifie que l’article existe et qu'il appartient bien a la session actuelle
-            if (panier != null && panier.SessionId == sessionId)
+            if (!string.IsNullOrEmpty(sessionId))
             {
-                _context.Paniers.Remove(panier);
-                await _context.SaveChangesAsync();
+                // Lire le panier depuis Redis
+                var panierKey = $"Panier_{sessionId}";
+                var cachedData = await _cache.GetStringAsync(panierKey);
                 
-                await _cache.RemoveAsync($"Panier_{sessionId}");
-                await _cache.RemoveAsync($"PanierCount_{sessionId}");
-                
-                TempData["Message"] = "Article supprime du panier.";
+                if (cachedData != null)
+                {
+                    var articles = JsonSerializer.Deserialize<List<PanierItemDTO>>(cachedData) ?? new();
+                    
+                    // Supprimer l'article
+                    var article = articles.FirstOrDefault(a => a.Id == id);
+                    if (article != null)
+                    {
+                        articles.Remove(article);
+                        
+                        // Mettre à jour Redis
+                        var serialized = JsonSerializer.Serialize(articles);
+                        await _cache.SetStringAsync(panierKey, serialized, new DistributedCacheEntryOptions
+                        {
+                            AbsoluteExpirationRelativeToNow = TimeSpan.FromDays(7)
+                        });
+                        
+                        await _cache.RemoveAsync($"PanierCount_{sessionId}");
+                        
+                        TempData["Message"] = "Article supprime du panier.";
+                    }
+                }
             }
 
             return RedirectToPage();
