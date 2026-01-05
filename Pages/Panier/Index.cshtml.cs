@@ -12,7 +12,7 @@ namespace ProjetTestDotNet.Pages.Panier
     {
         private readonly AppDbContext _context;
         private readonly IDistributedCache _cache;
-
+        // Constructeur pour injection de dependances
         public IndexModel(AppDbContext context, IDistributedCache cache)
         {
             _context = context;
@@ -34,9 +34,9 @@ namespace ProjetTestDotNet.Pages.Panier
                 sessionId = Guid.NewGuid().ToString();
                 Response.Cookies.Append("SessionId", sessionId, new CookieOptions
                 {
-                    HttpOnly = true,
+                    HttpOnly = true, // Accessible uniquement via HTTP
                     Secure = true,
-                    SameSite = SameSiteMode.Lax,
+                    SameSite = SameSiteMode.Lax, // Protection CSRF
                     Expires = DateTimeOffset.UtcNow.AddDays(30)
                 });
             }
@@ -56,6 +56,7 @@ namespace ProjetTestDotNet.Pages.Panier
                 }
                 else
                 {
+                    // Panier vide
                     ArticlesPanier = new List<PanierItemDTO>();
                     Console.WriteLine($"Panier vide pour session: {sessionId.Substring(0, 8)}...");
                 }
@@ -143,6 +144,63 @@ namespace ProjetTestDotNet.Pages.Panier
             }
 
             return RedirectToPage();
+        }
+
+        public async Task<IActionResult> OnGetDebugAsync()
+        {
+            var sessionId = Request.Cookies["SessionId"];
+            
+            var result = "debug redis\n";
+            
+            if (string.IsNullOrEmpty(sessionId))
+            {
+                result += "Pas de sessionId\n";
+                return Content(result, "text/plain; charset=utf-8");
+            }
+            
+            
+            try
+            {
+                var panierKey = $"Panier_{sessionId}";
+                var cachedData = await _cache.GetStringAsync(panierKey);
+                
+                if (cachedData != null)
+                {
+                    var articles = JsonSerializer.Deserialize<List<PanierItemDTO>>(cachedData);
+                    
+                    if (articles != null && articles.Any())
+                    {
+                    
+                        
+                        foreach (var article in articles)
+                        {
+                            result += $" {article.ProduitNom}\n";
+                            result += $"    ProduitId: {article.ProduitId}\n";
+                            result += $"    Quantité: {article.Quantite}\n";
+                            result += $"    Prix unitaire: {article.PrixUnitaire:F2}€\n";
+                            result += $"    Sous-total: {article.SousTotal:F2}€\n";
+                            result += $"    Stock disponible: {article.ProduitStock}\n\n";
+                        }
+                        
+            
+                    }
+                    else
+                    {
+                        result += " Panier vide\n";
+                    }
+                }
+                else
+                {
+                    result += "   Ajoutez des produits au panier\n";
+                }
+            }
+            catch (Exception ex)
+            {
+                result += $"ERREUR: {ex.Message}\n";
+                result += $"Type: {ex.GetType().Name}\n";
+            }
+            
+            return Content(result, "text/plain; charset=utf-8");
         }
     }
 }

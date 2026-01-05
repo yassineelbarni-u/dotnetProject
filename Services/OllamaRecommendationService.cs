@@ -32,13 +32,13 @@ namespace ProjetTestDotNet.Services
 
                 var produitsContext = BuildProductContext(produits);
 
-                var prompt = $@"Tu es un assistant e-commerce. Voici les produits disponibles :
+                var prompt = $@"Tu es un assistant e-commerce Voici les produits disponibles :
 
 {produitsContext}
 
 Question : {userMessage}
 
-Réponds en français, sois concis (3-5 lignes max). Liste les produits pertinents avec leur prix.";
+Réponds en français ou anglais depend de la question, sois concis (3-5 lignes max). Liste les produits pertinents avec leur prix.";
 
                 // Appeler l'API Ollama
                 var response = await CallOllamaAsync(prompt);
@@ -46,11 +46,12 @@ Réponds en français, sois concis (3-5 lignes max). Liste les produits pertinen
             }
             catch (Exception ex)
             {
-                return $" Erreur lors de la génération des recommandations : {ex.Message}\n\n" +
-                       $" Vérifiez que Ollama est démarré : `ollama serve`";
+                return $" Erreur lors de la generation des recommandations : {ex.Message}\n\n" +
+                       $" Verifiez que Ollama est demarre : `ollama serve`";
             }
         }
-
+       
+       // Construire le contexte des produits pour le prompt
         private string BuildProductContext(List<Models.Produit> produits)
         {
             var sb = new StringBuilder();
@@ -63,12 +64,16 @@ Réponds en français, sois concis (3-5 lignes max). Liste les produits pertinen
             }
             return sb.ToString();
         }
-
+        
+        // communication avec Ollama
         private async Task<string> CallOllamaAsync(string prompt)
         {
+
+        // Creer le client HTTP via la factory
             var client = _httpClientFactory.CreateClient();
             client.Timeout = TimeSpan.FromMinutes(3);
 
+        // Construire le corps de la request JSON
             var requestBody = new
             {
                 model = "gemma:2b",
@@ -83,6 +88,8 @@ Réponds en français, sois concis (3-5 lignes max). Liste les produits pertinen
             };
 
             var jsonContent = JsonSerializer.Serialize(requestBody);
+            
+            // Creer le contenu HTTP avec le JSON
             var content = new StringContent(jsonContent, Encoding.UTF8, "application/json");
 
             try
