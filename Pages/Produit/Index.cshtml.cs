@@ -166,6 +166,7 @@ namespace ProjetTestDotNet.Pages.Produit
 
             if (cachedData != null)
             {
+                // convertir JSON en liste d'articles
                 articles = JsonSerializer.Deserialize<List<ProjetTestDotNet.DTOs.PanierItemDTO>>(cachedData) ?? new();
             }
             else
@@ -173,7 +174,7 @@ namespace ProjetTestDotNet.Pages.Produit
                 articles = new List<ProjetTestDotNet.DTOs.PanierItemDTO>();
             }
 
-            // Verifier si le produit existe dejà dans le panier
+            // Verifier si le produit existe deja dans le panier
             var articleExistant = articles.FirstOrDefault(a => a.ProduitId == id);
 
             if (articleExistant != null)

@@ -38,7 +38,7 @@ namespace ProjetTestDotNet.Services
 
 Question : {userMessage}
 
-Réponds en français ou anglais depend de la question, sois concis (3-5 lignes max). Liste les produits pertinents avec leur prix.";
+Reponds en français ou anglais depend de la question, sois concis (3-5 lignes max). Liste les produits pertinents avec leur prix";
 
                 // Appeler l'API Ollama
                 var response = await CallOllamaAsync(prompt);
@@ -47,10 +47,10 @@ Réponds en français ou anglais depend de la question, sois concis (3-5 lignes 
             catch (Exception ex)
             {
                 return $" Erreur lors de la generation des recommandations : {ex.Message}\n\n" +
-                       $" Verifiez que Ollama est demarre : `ollama serve`";
+                   $" Verifiez que Ollama est demarre : `ollama serve`";
             }
         }
-       
+
        // Construire le contexte des produits pour le prompt
         private string BuildProductContext(List<Models.Produit> produits)
         {
@@ -88,7 +88,7 @@ Réponds en français ou anglais depend de la question, sois concis (3-5 lignes 
             };
 
             var jsonContent = JsonSerializer.Serialize(requestBody);
-            
+
             // Creer le contenu HTTP avec le JSON
             var content = new StringContent(jsonContent, Encoding.UTF8, "application/json");
 
@@ -104,7 +104,7 @@ Réponds en français ou anglais depend de la question, sois concis (3-5 lignes 
 
                 var responseContent = await response.Content.ReadAsStringAsync();
                 var jsonResponse = JsonDocument.Parse(responseContent);
-                
+
                 var recommendation = jsonResponse.RootElement
                     .GetProperty("response")
                     .GetString();

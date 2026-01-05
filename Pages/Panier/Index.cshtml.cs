@@ -92,7 +92,7 @@ namespace ProjetTestDotNet.Pages.Panier
                     {
                         articles.Remove(article);
                         
-                        // Mettre à jour Redis
+                        // Mettre a jour Redis
                         var serialized = JsonSerializer.Serialize(articles);
                         await _cache.SetStringAsync(panierKey, serialized, new DistributedCacheEntryOptions
                         {

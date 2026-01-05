@@ -15,6 +15,7 @@ builder.Services.AddSession(options =>
     options.Cookie.IsEssential = true;
 });
 
+// configuration redis
 builder.Services.AddStackExchangeRedisCache(options =>
 {
     options.Configuration = "localhost:6379";
