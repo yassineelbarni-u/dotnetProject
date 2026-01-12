@@ -4,7 +4,6 @@ using ProjetTestDotNet.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Services
 builder.Services.AddRazorPages();
 
 // Configuration des sessions
@@ -28,9 +27,9 @@ builder.Services.AddHttpClient();
 // Services pour Vector RAG (Qdrant + Embeddings)
 builder.Services.AddScoped<IEmbeddingService, SemanticKernelEmbeddingService>();
 builder.Services.AddScoped<IQdrantService, QdrantService>();
-builder.Services.AddScoped<IRAGService, VectorRAGService>();  // RAG avec Vector Database
+builder.Services.AddScoped<IRAGService, VectorRAGService>();
 
-// Service LLM (Generation)
+// Service LLM Generation
 builder.Services.AddScoped<IRecommendationService, OllamaRecommendationService>();
 
 // DbContext + SQL Server

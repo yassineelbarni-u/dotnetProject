@@ -21,8 +21,9 @@ namespace ProjetTestDotNet.Services
             _productEmbeddingsCache = new Dictionary<int, float[]>();
         }
 
+// Methode principale pour recuperer les produits pertinents
         public async Task<List<Produit>> RetrieveRelevantProductsAsync(
-            string userQuery, 
+            string userQuery,
             List<Produit> allProducts)
         {
             var queryEmbedding = await _embeddingService.GenerateEmbeddingAsync(userQuery);
@@ -57,7 +58,7 @@ namespace ProjetTestDotNet.Services
 
             if (productsToIndex.Any())
             {
-                Console.WriteLine($"🔄 Indexation de {productsToIndex.Count} produits dans Qdrant...");
+                Console.WriteLine($" Indexation de {productsToIndex.Count} produits dans Qdrant...");
 
                 foreach (var product in productsToIndex)
                 {
@@ -80,7 +81,7 @@ namespace ProjetTestDotNet.Services
                     _productEmbeddingsCache[product.Id] = embedding;
                 }
 
-                Console.WriteLine("✅ Indexation terminée !");
+                Console.WriteLine(" Indexation terminée !");
             }
         }
 

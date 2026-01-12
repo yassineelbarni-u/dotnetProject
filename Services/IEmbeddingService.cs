@@ -1,7 +1,7 @@
 namespace ProjetTestDotNet.Services
 {
     /// <summary>
-    /// Service d'embeddings vectoriels (texte → vecteur).
+    /// Service d'embeddings vectoriels
     /// </summary>
     public interface IEmbeddingService
     {

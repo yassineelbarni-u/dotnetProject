@@ -4,7 +4,7 @@ using System.Text.Json;
 namespace ProjetTestDotNet.Services
 {
     /// <summary>
-    /// Service Qdrant (Vector Database) utilisant l'API REST.
+    /// Service Qdrant (Vector Database) utilisant l'API REST
     /// </summary>
     public class QdrantService : IQdrantService
     {
@@ -52,7 +52,7 @@ namespace ProjetTestDotNet.Services
                 throw new Exception($"Erreur création collection : {error}");
             }
 
-            Console.WriteLine($"✅ Collection '{collectionName}' créée dans Qdrant");
+            Console.WriteLine($" Collection '{collectionName}' créée dans Qdrant");
         }
 
         public async Task DeleteCollectionAsync(string collectionName)
@@ -109,7 +109,7 @@ namespace ProjetTestDotNet.Services
 
                 if (!response.IsSuccessStatusCode)
                 {
-                    Console.WriteLine("⚠️ Qdrant non disponible");
+                    Console.WriteLine(" Qdrant non disponible");
                     return new List<int>();
                 }
 
@@ -120,7 +120,7 @@ namespace ProjetTestDotNet.Services
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"⚠️ Erreur Qdrant : {ex.Message}");
+                Console.WriteLine($" Erreur Qdrant : {ex.Message}");
                 return new List<int>();
             }
         }
