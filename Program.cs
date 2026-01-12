@@ -22,8 +22,15 @@ builder.Services.AddStackExchangeRedisCache(options =>
     options.InstanceName = "ProjetTestDotNet_";
 });
 
-// Service de recommandation IA (Ollama et RAG)
+// Service de recommandation IA (Ollama et RAG avec Vector Database)
 builder.Services.AddHttpClient();
+
+// Services pour Vector RAG (Qdrant + Embeddings)
+builder.Services.AddScoped<IEmbeddingService, SemanticKernelEmbeddingService>();
+builder.Services.AddScoped<IQdrantService, QdrantService>();
+builder.Services.AddScoped<IRAGService, VectorRAGService>();  // RAG avec Vector Database
+
+// Service LLM (Generation)
 builder.Services.AddScoped<IRecommendationService, OllamaRecommendationService>();
 
 // DbContext + SQL Server
