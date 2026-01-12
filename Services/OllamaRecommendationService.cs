@@ -32,13 +32,19 @@ namespace ProjetTestDotNet.Services
 
                 var produitsContext = BuildProductContext(produits);
 
-                var prompt = $@"Tu es un assistant e-commerce Voici les produits disponibles :
+                // ⚡ PROMPT OPTIMISÉ pour petit modèle (qwen2:0.5b)
+                var prompt = $@"Tu es un assistant e-commerce expert.
 
+Produits disponibles :
 {produitsContext}
 
-Question : {userMessage}
+Question client : {userMessage}
 
-Reponds en français ou anglais depend de la question, sois concis (3-5 lignes max). Liste les produits pertinents avec leur prix";
+Instructions :
+- Réponds en français (sauf si la question est en anglais)
+- Maximum 3 lignes
+- Recommande les produits les plus adaptés avec leur prix
+- Si aucun produit ne correspond, propose une alternative";
 
                 // Appeler l'API Ollama
                 var response = await CallOllamaAsync(prompt);
@@ -56,11 +62,12 @@ Reponds en français ou anglais depend de la question, sois concis (3-5 lignes m
         {
             var sb = new StringBuilder();
 
-            var produitsLimites = produits.Take(20).ToList();
+            var produitsLimites = produits.Take(10).ToList();
 
             foreach (var p in produitsLimites)
             {
-                sb.AppendLine($"- {p.Nom} | {p.Prix:F0}€ | {p.Categorie ?? "Autre"} | Stock: {p.Stock}");
+                // Format compact pour reduire les tokens
+                sb.AppendLine($"- {p.Nom} | {p.Prix:F0}€ | {p.Categorie ?? "Autre"}");
             }
             return sb.ToString();
         }
@@ -73,17 +80,22 @@ Reponds en français ou anglais depend de la question, sois concis (3-5 lignes m
             var client = _httpClientFactory.CreateClient();
             client.Timeout = TimeSpan.FromMinutes(3);
 
-        // Construire le corps de la request JSON
             var requestBody = new
             {
-                model = "gemma:2b",
+                // options de modele
+
+                // model = "tinyllama",
+                // model = "phi",
+                model = "qwen2:0.5b",
+                // model = "gemma:2b",
+                
                 prompt = prompt,
                 stream = false,
                 options = new
                 {
                     temperature = 0.7,
-                    num_predict = 200,
-                    num_ctx = 1024
+                    num_predict = 100,
+                    num_ctx = 512
                 }
             };
 
