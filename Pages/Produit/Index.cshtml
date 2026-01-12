@@ -578,13 +578,13 @@
             <p>Posez-moi des questions sur nos produits</p>
             <div class="quick-questions-amazon">
                 <button class="quick-btn-amazon" data-question="Quels sont les meilleurs produits ?">
-                    ⭐ Meilleures ventes
+                     Meilleures ventes
                 </button>
                 <button class="quick-btn-amazon" data-question="Quels produits coûtent moins de 50€ ?">
-                    💰 Moins de 50€
+                     Moins de 50€
                 </button>
                 <button class="quick-btn-amazon" data-question="Quels produits sont en stock ?">
-                    📦 Disponibles
+                     Disponibles
                 </button>
             </div>
         </div>
@@ -610,14 +610,13 @@
 </div>
 
 <style>
-    /* 🎨 CHAT BUTTON (Style Amazon) */
     .amazon-chat-btn {
         position: fixed;
         bottom: 30px;
         right: 30px;
         width: 60px;
         height: 60px;
-        background: #febd69; /* Orange Amazon */
+        background: #febd69;
         border: 2px solid #f3a847;
         border-radius: 50%;
         box-shadow: 0 4px 12px rgba(254, 189, 105, 0.4);
@@ -690,15 +689,14 @@
         }
     }
 
-    /* 🎨 HEADER (Noir Amazon) */
     .amazon-chat-header {
-        background: #131921; /* Noir Amazon */
+        background: #131921; 
         color: white;
         padding: 16px;
         display: flex;
         justify-content: space-between;
         align-items: center;
-        border-bottom: 2px solid #febd69; /* Bordure orange */
+        border-bottom: 2px solid #febd69; 
     }
 
     .chat-header-left {
@@ -765,7 +763,6 @@
         background: #232f3e;
     }
 
-    /* 💬 BODY DU CHAT */
     .amazon-chat-body {
         flex: 1;
         overflow-y: auto;
@@ -827,7 +824,6 @@
         box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     }
 
-    /* 💬 MESSAGES */
     .chat-message-amazon {
         margin-bottom: 12px;
         animation: fadeInMsg 0.3s;
@@ -844,7 +840,7 @@
     }
 
     .message-user-amazon .msg-bubble {
-        background: #febd69; /* Orange Amazon */
+        background: #febd69;
         color: #0f1111;
         padding: 10px 14px;
         border-radius: 16px 16px 4px 16px;
@@ -903,7 +899,6 @@
         30% { transform: translateY(-8px); }
     }
 
-    /* 📝 FOOTER */
     .amazon-chat-footer {
         padding: 12px;
         background: white;
@@ -954,7 +949,6 @@
         cursor: not-allowed;
     }
 
-    /* 📱 RESPONSIVE */
     @@media (max-width: 768px) {
         .amazon-chat-window {
             width: calc(100% - 20px);
@@ -973,7 +967,6 @@
 </style>
 
 <script>
-    // 🤖 GESTION DU CHAT AMAZON
     const chatBtn = document.getElementById('chatToggleBtn');
     const chatWin = document.getElementById('chatWindow');
     const closeBtn = document.getElementById('chatCloseBtn');
@@ -982,7 +975,6 @@
     const chatBody = document.getElementById('chatBody');
     const sendBtn = document.getElementById('chatSendBtn');
 
-    // Ouvrir/Fermer
     chatBtn.addEventListener('click', () => {
         chatWin.classList.add('active');
         chatBtn.style.display = 'none';
@@ -994,7 +986,6 @@
         chatBtn.style.display = 'flex';
     });
 
-    // Questions rapides
     document.querySelectorAll('.quick-btn-amazon').forEach(btn => {
         btn.addEventListener('click', () => {
             chatInput.value = btn.getAttribute('data-question');
@@ -1002,7 +993,6 @@
         });
     });
 
-    // Envoyer message
     chatForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         await sendMsg();
@@ -1012,15 +1002,12 @@
         const msg = chatInput.value.trim();
         if (!msg) return;
 
-        // Supprimer welcome
         const welcome = document.querySelector('.chat-welcome-amazon');
         if (welcome) welcome.remove();
 
-        // Message utilisateur
         addUserMsg(msg);
         chatInput.value = '';
 
-        // Typing indicator
         const typing = showTyping();
         sendBtn.disabled = true;
 
@@ -1045,7 +1032,7 @@
             }
         } catch (error) {
             typing.remove();
-            addBotMsg("❌ Erreur : Vérifiez qu'Ollama est démarré.");
+            addBotMsg(" Erreur : Vérifiez qu'Ollama est démarré.");
         } finally {
             sendBtn.disabled = false;
             chatInput.focus();
